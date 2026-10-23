@@ -1,1115 +1,825 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pegando Onda com Fato e Opinião</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --sky-top: #38bdf8;
-      --sky-bottom: #bae6fd;
-      --ocean-deep: #0369a1;
-      --ocean-mid: #0284c7;
-      --ocean-crest: #38bdf8;
-      --sand-light: #fef08a;
-      --sand-dark: #facc15;
-      --fact-blue: #0284c7;
-      --fact-dark: #0369a1;
-      --opinion-pink: #db2777;
-      --opinion-dark: #9d174d;
-      --success: #16a34a;
-      --danger: #dc2626;
-      --gold: #f59e0b;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-    }
-
-    body {
-      font-family: 'Nunito', sans-serif;
-      background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 55%, var(--sand-light) 90%, var(--sand-dark) 100%);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 12px;
-      color: #0f172a;
-      overflow-x: hidden;
-    }
-
-    /* Sol e nuvens decorativas no fundo */
-    .sky-decor {
-      position: fixed;
-      top: 18px;
-      left: 5%;
-      width: 65px;
-      height: 65px;
-      background: radial-gradient(circle, #fde047 60%, rgba(253, 224, 71, 0) 72%);
-      border-radius: 50%;
-      box-shadow: 0 0 40px #facc15;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    .app-shell {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      max-width: 960px;
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(8px);
-      border-radius: 28px;
-      border: 5px solid #ffffff;
-      box-shadow: 0 18px 40px rgba(3, 105, 161, 0.28);
-      overflow: hidden;
-      margin-top: 6px;
-    }
-
-    /* Cabeçalho do Jogo */
-    .game-header {
-      background: linear-gradient(90deg, #0369a1 0%, #0284c7 50%, #0ea5e9 100%);
-      color: white;
-      padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      border-bottom: 4px solid #38bdf8;
-    }
-
-    .brand-title {
-      font-family: 'Fredoka', sans-serif;
-      font-size: 1.65rem;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.25);
-    }
-
-    .header-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .pill-btn {
-      background: rgba(255, 255, 255, 0.2);
-      border: 2px solid rgba(255, 255, 255, 0.6);
-      color: white;
-      padding: 6px 14px;
-      border-radius: 999px;
-      font-weight: 800;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .pill-btn:hover {
-      background: rgba(255, 255, 255, 0.35);
-      transform: translateY(-2px);
-    }
-
-    /* Telas */
-    .screen {
-      display: none;
-      padding: 24px;
-    }
-
-    .screen.active {
-      display: block;
-      animation: fadeIn 0.35s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* TELA INICIAL HERO */
-    .hero-banner {
-      background: linear-gradient(180deg, #7dd3fc 0%, #38bdf8 55%, #fde047 100%);
-      border-radius: 22px;
-      padding: 20px;
-      text-align: center;
-      border: 4px solid #fff;
-      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.18);
-      margin-bottom: 22px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero-characters {
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      gap: 36px;
-      margin: 10px 0;
-    }
-
-    .char-badge {
-      display: inline-block;
-      padding: 5px 16px;
-      border-radius: 999px;
-      font-family: 'Fredoka', sans-serif;
-      font-size: 1.1rem;
-      color: #fff;
-      margin-bottom: 6px;
-      box-shadow: 0 4px 0 rgba(0,0,0,0.2);
-    }
-
-    .char-badge.fact { background: var(--fact-blue); }
-    .char-badge.opinion { background: var(--opinion-pink); }
-
-    .setup-card {
-      background: #f8fafc;
-      border: 2px solid #e2e8f0;
-      border-radius: 20px;
-      padding: 20px;
-      max-width: 600px;
-      margin: 0 auto 24px auto;
-      text-align: center;
-    }
-
-    .name-row {
-      display: flex;
-      gap: 10px;
-      margin: 14px 0 18px 0;
-    }
-
-    .name-input {
-      flex: 1;
-      padding: 14px 18px;
-      font-size: 1.05rem;
-      font-weight: 700;
-      border: 3px solid #cbd5e1;
-      border-radius: 14px;
-      outline: none;
-      transition: 0.2s;
-    }
-
-    .name-input:focus {
-      border-color: var(--fact-blue);
-      box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
-    }
-
-    .dice-btn {
-      background: #f59e0b;
-      color: white;
-      border: none;
-      border-radius: 14px;
-      padding: 0 18px;
-      font-size: 1.4rem;
-      cursor: pointer;
-      box-shadow: 0 5px 0 #b45309;
-      transition: 0.15s;
-    }
-
-    .dice-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #b45309; }
-
-    .mode-buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-
-    .start-btn {
-      padding: 16px;
-      border: none;
-      border-radius: 16px;
-      font-family: 'Fredoka', sans-serif;
-      font-size: 1.15rem;
-      color: white;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: 0.15s;
-    }
-
-    .start-btn.classic {
-      background: linear-gradient(180deg, #0ea5e9, #0284c7);
-      box-shadow: 0 6px 0 #0369a1;
-    }
-
-    .start-btn.timed {
-      background: linear-gradient(180deg, #ec4899, #db2777);
-      box-shadow: 0 6px 0 #9d174d;
-    }
-
-    .start-btn:hover { filter: brightness(1.06); transform: translateY(-2px); }
-    .start-btn:active { transform: translateY(4px); }
-
-    /* HUD DE JOGO */
-    .hud-bar {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .hud-item {
-      background: #f1f5f9;
-      border: 2px solid #e2e8f0;
-      border-radius: 14px;
-      padding: 10px 14px;
-      text-align: center;
-      font-weight: 800;
-      font-size: 0.98rem;
-      color: #1e293b;
-    }
-
-    .hud-item.combo {
-      background: #fef3c7;
-      border-color: #fde68a;
-      color: #b45309;
-    }
-
-    /* Barra do Relógio */
-    .timer-wrap {
-      width: 100%;
-      height: 12px;
-      background: #e2e8f0;
-      border-radius: 999px;
-      overflow: hidden;
-      margin-bottom: 14px;
-      display: none;
-      border: 2px solid #cbd5e1;
-    }
-
-    .timer-fill {
-      height: 100%;
-      width: 100%;
-      background: linear-gradient(90deg, #22c55e, #eab308, #ef4444);
-      transition: width 1s linear;
-    }
-
-    /* CENÁRIO ANIMADO DA ONDA E SURFISTA */
-    .ocean-stage {
-      position: relative;
-      height: 165px;
-      background: linear-gradient(180deg, #7dd3fc 0%, #38bdf8 45%, #0284c7 85%, #0369a1 100%);
-      border-radius: 22px;
-      border: 4px solid #fff;
-      box-shadow: inset 0 -10px 25px rgba(3, 105, 161, 0.4), 0 6px 16px rgba(0,0,0,0.08);
-      overflow: hidden;
-      margin-bottom: 18px;
-    }
-
-    .wave-layer {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 200%;
-      height: 75px;
-      animation: waveSlide 7s linear infinite;
-    }
-
-    .wave-layer.front {
-      height: 55px;
-      animation-duration: 4.5s;
-      opacity: 0.85;
-    }
-
-    @keyframes waveSlide {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-
-    .surfer-vessel {
-      position: absolute;
-      bottom: 24px;
-      left: 5%;
-      width: 78px;
-      height: 78px;
-      z-index: 6;
-      transition: left 0.65s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.45s ease;
-      filter: drop-shadow(0 6px 6px rgba(0,0,0,0.25));
-    }
-
-    .surfer-vessel.maneuver {
-      animation: radicalFlip 0.75s ease;
-    }
-
-    .surfer-vessel.wipeout {
-      animation: shakeWipeout 0.6s ease;
-    }
-
-    @keyframes radicalFlip {
-      0% { transform: translateY(0) rotate(0deg) scale(1); }
-      45% { transform: translateY(-38px) rotate(-22deg) scale(1.18); }
-      100% { transform: translateY(0) rotate(0deg) scale(1); }
-    }
-
-    @keyframes shakeWipeout {
-      0%, 100% { transform: rotate(0deg); }
-      25% { transform: translateY(8px) rotate(28deg); }
-      65% { transform: translateY(5px) rotate(-22deg); }
-    }
-
-    .crest-trophy {
-      position: absolute;
-      right: 16px;
-      bottom: 30px;
-      font-size: 2.5rem;
-      z-index: 5;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
-    }
-
-    /* ARENA CENTRAL: GUARDIÕES LEO & BIA + CARTÃO DE ONDA */
-    .arena-grid {
-      display: grid;
-      grid-template-columns: 155px 1fr 155px;
-      gap: 14px;
-      align-items: center;
-      margin-bottom: 18px;
-    }
-
-    .guardian-box {
-      background: #f8fafc;
-      border: 3px solid #e2e8f0;
-      border-radius: 20px;
-      padding: 10px;
-      text-align: center;
-      position: relative;
-      transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .guardian-box.leo { border-color: #bae6fd; background: linear-gradient(180deg, #f0f9ff, #e0f2fe); }
-    .guardian-box.bia { border-color: #fbcfe8; background: linear-gradient(180deg, #fdf2f8, #fce7f3); }
-
-    .guardian-box.cheer {
-      transform: translateY(-10px) scale(1.06);
-      box-shadow: 0 12px 24px rgba(0,0,0,0.12);
-    }
-
-    .speech-bubble {
-      position: absolute;
-      top: -36px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1e293b;
-      color: #fff;
-      font-size: 0.78rem;
-      font-weight: 800;
-      padding: 5px 10px;
-      border-radius: 10px;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: 0.25s;
-      z-index: 10;
-    }
-
-    .guardian-box.cheer .speech-bubble {
-      opacity: 1;
-      top: -42px;
-    }
-
-    .guardian-title {
-      font-family: 'Fredoka', sans-serif;
-      font-size: 1rem;
-      margin-top: 4px;
-    }
-
-    .guardian-sub {
-      font-size: 0.75rem;
-      color: #475569;
-      font-weight: 700;
-    }
-
-    /* Cartão da Frase (Estilo Onda do PDF) */
-    .wave-card {
-      background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
-      border: 4px solid #38bdf8;
-      border-radius: 24px;
-      padding: 26px 22px;
-      min-height: 170px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      box-shadow: 0 10px 25px rgba(2, 132, 199, 0.12);
-      position: relative;
-    }
-
-    .wave-card-tag {
-      position: absolute;
-      top: -14px;
-      background: #0284c7;
-      color: white;
-      font-size: 0.8rem;
-      font-weight: 800;
-      padding: 4px 14px;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-    }
-
-    .statement-text {
-      font-family: 'Fredoka', sans-serif;
-      font-size: 1.45rem;
-      line-height: 1.35;
-      color: #0f172a;
-    }
-
-    /* Botões de Decisão FATO vs OPINIÃO */
-    .decision-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-      margin-bottom: 16px;
-    }
-
-    .choice-btn {
-      padding: 18px;
-      border: none;
-      border-radius: 18px;
-      font-family: 'Fredoka', sans-serif;
-      font-size: 1.35rem;
-      color: white;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      transition: 0.15s;
-    }
-
-    .choice-btn span.hint {
-      font-family: 'Nunito', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 700;
-      opacity: 0.92;
-    }
-
-    .choice-btn.fact-btn {
-      background: linear-gradient(180deg, #0ea5e9 0%, #0284c7 100%);
-      box-shadow: 0 7px 0 var(--fact-dark);
-    }
-
-    .choice-btn.opinion-btn {
-      background: linear-gradient(180deg, #ec4899 0%, #db2777 100%);
-      box-shadow: 0 7px 0 var(--opinion-dark);
-    }
-
-    .choice-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
-    .choice-btn:active { transform: translateY(4px); }
-
-    /* Feedback Pedagógico */
-    .feedback-panel {
-      display: none;
-      padding: 16px 20px;
-      border-radius: 16px;
-      margin-bottom: 16px;
-      text-align: center;
-      font-weight: 700;
-      font-size: 1.05rem;
-      animation: fadeIn 0.25s ease;
-    }
-
-    .feedback-panel.ok {
-      background: #dcfce7;
-      border: 3px solid #22c55e;
-      color: #14532d;
-    }
-
-    .feedback-panel.err {
-      background: #fee2e2;
-      border: 3px solid #ef4444;
-      color: #7f1d1d;
-    }
-
-    .next-wave-btn {
-      display: none;
-      width: 100%;
-      padding: 15px;
-      border: none;
-      border-radius: 16px;
-      background: linear-gradient(90deg, #f59e0b, #eab308);
-      color: #fff;
-      font-family: 'Fredoka', sans-serif;
-      font-size: 1.25rem;
-      cursor: pointer;
-      box-shadow: 0 6px 0 #b45309;
-    }
-
-    /* PLACAR DA TURMA */
-    .ranking-card {
-      background: #ffffff;
-      border: 3px solid #e2e8f0;
-      border-radius: 20px;
-      padding: 18px;
-      margin-top: 16px;
-    }
-
-    .ranking-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .ranking-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .ranking-table th, .ranking-table td {
-      padding: 10px 12px;
-      text-align: left;
-      border-bottom: 1px solid #f1f5f9;
-      font-size: 0.95rem;
-    }
-
-    .ranking-table th {
-      background: #f8fafc;
-      color: #475569;
-      font-weight: 800;
-    }
-
-    /* CERTIFICADO */
-    .certificate-box {
-      border: 8px double #0284c7;
-      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-      border-radius: 22px;
-      padding: 30px 22px;
-      text-align: center;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    }
-
-    @media (max-width: 720px) {
-      .arena-grid { grid-template-columns: 1fr; }
-      .guardian-box { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 8px 14px; }
-      .hud-bar { grid-template-columns: 1fr 1fr; }
-      .mode-buttons, .decision-grid { grid-template-columns: 1fr; }
-      .statement-text { font-size: 1.22rem; }
-    }
-
-    @media print {
-      body * { visibility: hidden; }
-      #certPrintArea, #certPrintArea * { visibility: visible; }
-      #certPrintArea { position: absolute; left: 0; top: 0; width: 100%; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pegando Onda com Fato e Opinião</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --sky-top: #0284c7;
+            --sky-bottom: #7dd3fc;
+            --ocean-deep: #0369a1;
+            --ocean-mid: #0ea5e9;
+            --ocean-light: #38bdf8;
+            --sand: #fde047;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            overflow-x: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        h1, h2, h3, .font-display {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        @keyframes floatCloud {
+            0% { transform: translateX(-10%); }
+            50% { transform: translateX(10%); }
+            100% { transform: translateX(-10%); }
+        }
+
+        @keyframes waveMove {
+            0% { transform: translateX(0) translateZ(0) scaleY(1); }
+            50% { transform: translateX(-25%) translateZ(0) scaleY(0.92); }
+            100% { transform: translateX(-50%) translateZ(0) scaleY(1); }
+        }
+
+        @keyframes sunPulse {
+            0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 20px rgba(253, 224, 71, 0.8)); }
+            50% { transform: scale(1.08) rotate(15deg); filter: drop-shadow(0 0 35px rgba(250, 204, 21, 1)); }
+        }
+
+        @keyframes surferIdle {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(1deg); }
+        }
+
+        @keyframes surferCelebrate {
+            0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+            25% { transform: translateY(-22px) scale(1.08) rotate(-6deg); }
+            50% { transform: translateY(-5px) scale(1.05) rotate(6deg); }
+            75% { transform: translateY(-18px) scale(1.08) rotate(-4deg); }
+        }
+
+        @keyframes surferDoubt {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            20% { transform: translateX(-8px) rotate(-5deg); }
+            40% { transform: translateX(8px) rotate(5deg); }
+            60% { transform: translateX(-6px) rotate(-3deg); }
+            80% { transform: translateX(6px) rotate(3deg); }
+        }
+
+        @keyframes boardRide {
+            0%, 100% { transform: translateY(0px) rotate(-4deg); }
+            50% { transform: translateY(-5px) rotate(3deg); }
+        }
+
+        @keyframes boardRadicalManeuver {
+            0% { transform: translateY(0) rotate(0deg) scale(1); }
+            30% { transform: translateY(-28px) rotate(-360deg) scale(1.25); }
+            60% { transform: translateY(-10px) rotate(-375deg) scale(1.1); }
+            100% { transform: translateY(0) rotate(-360deg) scale(1); }
+        }
+
+        @keyframes boardWobble {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            20% { transform: translateY(6px) rotate(22deg); }
+            40% { transform: translateY(-4px) rotate(-22deg); }
+            60% { transform: translateY(4px) rotate(15deg); }
+            80% { transform: translateY(-2px) rotate(-10deg); }
+        }
+
+        .animate-cloud-slow { animation: floatCloud 18s ease-in-out infinite; }
+        .animate-cloud-fast { animation: floatCloud 12s ease-in-out infinite reverse; }
+        .animate-sun { animation: sunPulse 8s ease-in-out infinite; }
+        .surfer-idle { animation: surferIdle 3s ease-in-out infinite; }
+        .surfer-celebrate { animation: surferCelebrate 0.9s ease-in-out infinite; }
+        .surfer-doubt { animation: surferDoubt 0.6s ease-in-out; }
+        .board-idle { animation: boardRide 2.2s ease-in-out infinite; }
+        .board-maneuver { animation: boardRadicalManeuver 0.9s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .board-wobble { animation: boardWobble 0.8s ease-in-out; }
+
+        .wave-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 210px;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .wave-layer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background-repeat: repeat-x;
+            transform-origin: center bottom;
+        }
+
+        .btn-3d-blue { background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%); box-shadow: 0 6px 0 #0369a1, 0 10px 15px rgba(0,0,0,0.2); transition: all 0.15s ease; }
+        .btn-3d-blue:active { transform: translateY(5px); box-shadow: 0 1px 0 #0369a1, 0 4px 6px rgba(0,0,0,0.15); }
+        .btn-3d-pink { background: linear-gradient(180deg, #f472b6 0%, #db2777 100%); box-shadow: 0 6px 0 #9d174d, 0 10px 15px rgba(0,0,0,0.2); transition: all 0.15s ease; }
+        .btn-3d-pink:active { transform: translateY(5px); box-shadow: 0 1px 0 #9d174d, 0 4px 6px rgba(0,0,0,0.15); }
+        .btn-3d-yellow { background: linear-gradient(180deg, #fde047 0%, #eab308 100%); box-shadow: 0 6px 0 #a16207, 0 10px 15px rgba(0,0,0,0.2); transition: all 0.15s ease; }
+        .btn-3d-yellow:active { transform: translateY(5px); box-shadow: 0 1px 0 #a16207, 0 4px 6px rgba(0,0,0,0.15); }
+        .btn-3d-emerald { background: linear-gradient(180deg, #34d399 0%, #059669 100%); box-shadow: 0 6px 0 #065f46, 0 10px 15px rgba(0,0,0,0.2); transition: all 0.15s ease; }
+        .btn-3d-emerald:active { transform: translateY(5px); box-shadow: 0 1px 0 #065f46, 0 4px 6px rgba(0,0,0,0.15); }
+        .wave-card { background: rgba(255,255,255,0.96); backdrop-filter: blur(8px); border: 4px solid #38bdf8; box-shadow: 0 12px 30px -5px rgba(3, 105, 161, 0.35); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #e0f2fe; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #0284c7; }
+    </style>
 </head>
-<body>
-
-<div class="sky-decor"></div>
-
-<div class="app-shell">
-  <header class="game-header">
-    <div class="brand-title">
-      <span>🌊</span> PEGANDO ONDA COM FATO E OPINIÃO
-    </div>
-    <div class="header-controls">
-      <button class="pill-btn" id="soundToggleBtn" onclick="toggleAudio()">🔊 Som: ON</button>
-      <button class="pill-btn" onclick="goHome()">🏠 Início / Placar</button>
-    </div>
-  </header>
-
-  <!-- ==================== TELA 1: INÍCIO & PLACAR ==================== -->
-  <section id="homeScreen" class="screen active">
-    <div class="hero-banner">
-      <h2 style="font-family:'Fredoka',sans-serif; color:#0369a1; font-size:1.5rem;">
-        Escolha seu surfista e domine as ondas da leitura!
-      </h2>
-
-      <div class="hero-characters">
-        <!-- GUARDIÃO LEO (FATO) -->
-        <div>
-          <div class="char-badge fact">FATO</div>
-          <svg width="110" height="135" viewBox="0 0 120 150">
-            <!-- Prancha Azul com Onda -->
-            <ellipse cx="32" cy="78" rx="18" ry="62" fill="#e0f2fe" stroke="#0284c7" stroke-width="4"/>
-            <path d="M20,90 Q32,70 44,90 Q32,110 20,90 Z" fill="#0284c7"/>
-            <!-- Menino Surfista -->
-            <circle cx="72" cy="42" r="18" fill="#d97742"/>
-            <path d="M54,36 Q72,18 90,36 Q82,28 54,36 Z" fill="#451a03"/>
-            <circle cx="66" cy="42" r="2.5" fill="#1e293b"/>
-            <circle cx="78" cy="42" r="2.5" fill="#1e293b"/>
-            <path d="M66,49 Q72,54 78,49" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-            <!-- Camisa UV Azul/Preta -->
-            <rect x="57" y="60" width="30" height="34" rx="8" fill="#1e293b"/>
-            <path d="M57,65 L42,80" stroke="#0284c7" stroke-width="7" stroke-linecap="round"/>
-            <path d="M87,65 L96,85" stroke="#0284c7" stroke-width="7" stroke-linecap="round"/>
-            <!-- Bermuda Azul -->
-            <rect x="59" y="92" width="26" height="22" rx="4" fill="#0284c7"/>
-            <!-- Pernas -->
-            <line x1="65" y1="114" x2="65" y2="138" stroke="#d97742" stroke-width="6" stroke-linecap="round"/>
-            <line x1="79" y1="114" x2="79" y2="138" stroke="#d97742" stroke-width="6" stroke-linecap="round"/>
-          </svg>
+<body class="min-h-screen bg-gradient-to-b from-sky-400 via-sky-200 to-amber-100 flex flex-col justify-between relative selection:bg-yellow-300">
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div class="absolute top-6 right-6 sm:top-10 sm:right-16 animate-sun">
+            <svg width="90" height="90" viewBox="0 0 100 100" class="w-16 h-16 sm:w-24 sm:h-24">
+                <circle cx="50" cy="50" r="32" fill="#facc15" />
+                <circle cx="50" cy="50" r="26" fill="#fde047" />
+                <g stroke="#facc15" stroke-width="5" stroke-linecap="round">
+                    <line x1="50" y1="6" x2="50" y2="14" />
+                    <line x1="50" y1="86" x2="50" y2="94" />
+                    <line x1="6" y1="50" x2="14" y2="50" />
+                    <line x1="86" y1="50" x2="94" y2="50" />
+                    <line x1="19" y1="19" x2="25" y2="25" />
+                    <line x1="75" y1="75" x2="81" y2="81" />
+                    <line x1="81" y1="19" x2="75" y2="25" />
+                    <line x1="25" y1="75" x2="19" y2="81" />
+                </g>
+            </svg>
         </div>
 
-        <!-- GUARDIÃ BIA (OPINIÃO) -->
-        <div>
-          <div class="char-badge opinion">OPINIÃO</div>
-          <svg width="110" height="135" viewBox="0 0 120 150">
-            <!-- Prancha Amarela com Flor -->
-            <ellipse cx="88" cy="78" rx="18" ry="62" fill="#fef08a" stroke="#eab308" stroke-width="4"/>
-            <circle cx="88" cy="75" r="8" fill="#ec4899"/>
-            <!-- Menina Surfista -->
-            <path d="M32,40 Q48,20 64,40 L68,75 Q48,70 28,75 Z" fill="#451a03"/>
-            <circle cx="48" cy="42" r="17" fill="#d97742"/>
-            <circle cx="42" cy="42" r="2.5" fill="#1e293b"/>
-            <circle cx="54" cy="42" r="2.5" fill="#1e293b"/>
-            <path d="M43,49 Q48,54 53,49" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-            <!-- Roupa Rosa Colorida -->
-            <rect x="34" y="59" width="28" height="32" rx="8" fill="#ec4899"/>
-            <path d="M34,64 L24,84" stroke="#ec4899" stroke-width="6" stroke-linecap="round"/>
-            <path d="M62,64 L78,78" stroke="#ec4899" stroke-width="6" stroke-linecap="round"/>
-            <!-- Short Rosa -->
-            <rect x="35" y="89" width="26" height="18" rx="4" fill="#db2777"/>
-            <!-- Pernas -->
-            <line x1="42" y1="107" x2="42" y2="138" stroke="#d97742" stroke-width="6" stroke-linecap="round"/>
-            <line x1="54" y1="107" x2="54" y2="138" stroke="#d97742" stroke-width="6" stroke-linecap="round"/>
-          </svg>
+        <div class="absolute top-12 left-8 opacity-85 animate-cloud-slow">
+            <svg width="130" height="60" viewBox="0 0 130 60" fill="white">
+                <path d="M25,50 L105,50 C116,50 125,41 125,30 C125,20 117,12 107,11 C102,4 93,0 83,0 C69,0 57,9 53,22 C50,20 46,19 42,19 C30,19 21,28 20,39 C12,40 6,44 6,50 Z" />
+            </svg>
         </div>
-      </div>
-      <p style="font-weight:700; color:#0f172a;">
-        📘 <strong>Fato:</strong> O que pode ser provado e verificado. &nbsp;|&nbsp;
-        💭 <strong>Opinião:</strong> O que expressa sentimento, gosto ou ponto de vista.
-      </p>
-    </div>
 
-    <div class="setup-card">
-      <h3 style="font-family:'Fredoka',sans-serif; color:#0369a1;">Identificação do Surfista (Opcional)</h3>
-      <div class="name-row">
-        <input type="text" id="playerNameInput" class="name-input" placeholder="Digite seu nome ou nickname..." maxlength="22">
-        <button class="dice-btn" onclick="rollNickname()" title="Gerar apelido divertido">🎲</button>
-      </div>
-      <div class="mode-buttons">
-        <button class="start-btn classic" onclick="initMatch(false)">
-          🏄 Modo Clássico (12 Ondas)
-        </button>
-        <button class="start-btn timed" onclick="initMatch(true)">
-          ⏱️ Desafio Relógio (15s/Onda)
-        </button>
-      </div>
-    </div>
-
-    <!-- PLACAR DA TURMA -->
-    <div class="ranking-card">
-      <div class="ranking-header">
-        <h3 style="font-family:'Fredoka',sans-serif; color:#0369a1;">🏆 Placar de Escores da Turma</h3>
-        <div style="display:flex; gap:8px;">
-          <button class="pill-btn" style="background:#0284c7;" onclick="exportCSV()">📥 Exportar CSV</button>
-          <button class="pill-btn" style="background:#dc2626;" onclick="resetBoard()">🗑️ Zerar Placar</button>
+        <div class="absolute top-28 left-1/2 opacity-75 animate-cloud-fast hidden sm:block">
+            <svg width="100" height="45" viewBox="0 0 130 60" fill="white">
+                <path d="M25,50 L105,50 C116,50 125,41 125,30 C125,20 117,12 107,11 C102,4 93,0 83,0 C69,0 57,9 53,22 C50,20 46,19 42,19 C30,19 21,28 20,39 C12,40 6,44 6,50 Z" />
+            </svg>
         </div>
-      </div>
-      <table class="ranking-table">
-        <thead>
-          <tr>
-            <th>Rank</th>
-            <th>Surfista</th>
-            <th>Pontos</th>
-            <th>Acertos</th>
-            <th>Modo</th>
-          </tr>
-        </thead>
-        <tbody id="rankingBody"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- ==================== TELA 2: PARTIDA ==================== -->
-  <section id="playScreen" class="screen">
-    <div class="hud-bar">
-      <div class="hud-item" id="hudSurfer">🏄 Surfista</div>
-      <div class="hud-item" id="hudWaveCount">🌊 Onda 1 / 12</div>
-      <div class="hud-item combo" id="hudCombo">🔥 Combo: 0x</div>
-      <div class="hud-item" id="hudPoints">⭐ 0 pts</div>
     </div>
 
-    <div class="timer-wrap" id="timerWrap">
-      <div class="timer-fill" id="timerFill"></div>
-    </div>
-
-    <!-- PISTA DA ONDA ANIMADA -->
-    <div class="ocean-stage">
-      <div class="surfer-vessel" id="surferAvatar">
-        <svg viewBox="0 0 90 90" width="76" height="76">
-          <!-- Prancha -->
-          <ellipse cx="45" cy="70" rx="34" ry="8" fill="#fde047" stroke="#ca8a04" stroke-width="3"/>
-          <!-- Surfista em ação -->
-          <circle cx="46" cy="24" r="10" fill="#d97742"/>
-          <path d="M36,36 L56,36 L52,54 L38,54 Z" fill="#0284c7"/>
-          <line x1="36" y1="38" x2="22" y2="30" stroke="#d97742" stroke-width="5" stroke-linecap="round"/>
-          <line x1="56" y1="38" x2="70" y2="30" stroke="#d97742" stroke-width="5" stroke-linecap="round"/>
-          <line x1="40" y1="54" x2="34" y2="68" stroke="#1e293b" stroke-width="5" stroke-linecap="round"/>
-          <line x1="50" y1="54" x2="56" y2="68" stroke="#1e293b" stroke-width="5" stroke-linecap="round"/>
+    <div class="wave-container">
+        <svg class="wave-layer" style="animation: waveMove 16s linear infinite; bottom: 25px; opacity: 0.7;" viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <path fill="#0284c7" d="M0,192L48,197.3C96,203,192,213,288,192C384,171,480,117,576,112C672,107,768,149,864,165.3C960,181,1056,171,1152,149.3C1248,128,1344,96,1392,80L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
         </svg>
-      </div>
-      <div class="crest-trophy">🏝️</div>
-
-      <svg class="wave-layer" viewBox="0 0 1200 120" preserveAspectRatio="none">
-        <path d="M0,50 C300,110 300,0 600,50 C900,110 900,0 1200,50 L1200,120 L0,120 Z" fill="rgba(255,255,255,0.28)"/>
-      </svg>
-      <svg class="wave-layer front" viewBox="0 0 1200 120" preserveAspectRatio="none">
-        <path d="M0,65 C250,10 350,110 600,65 C850,10 950,110 1200,65 L1200,120 L0,120 Z" fill="rgba(255,255,255,0.5)"/>
-      </svg>
-    </div>
-
-    <!-- ARENA CENTRAL COM GUARDIÕES -->
-    <div class="arena-grid">
-      <div class="guardian-box leo" id="guardianLeo">
-        <div class="speech-bubble" id="leoBubble">Mandou bem no Fato!</div>
-        <svg width="65" height="65" viewBox="0 0 80 80">
-          <circle cx="40" cy="40" r="36" fill="#0284c7"/>
-          <circle cx="40" cy="38" r="18" fill="#d97742"/>
-          <path d="M22,30 Q40,14 58,30" fill="#451a03"/>
-          <circle cx="34" cy="37" r="2.5" fill="#fff"/>
-          <circle cx="46" cy="37" r="2.5" fill="#fff"/>
-          <path d="M33,45 Q40,51 47,45" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <svg class="wave-layer" style="animation: waveMove 11s linear infinite reverse; bottom: 10px; opacity: 0.85;" viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <path fill="#0ea5e9" d="M0,128L60,149.3C120,171,240,213,360,208C480,203,600,149,720,138.7C840,128,960,160,1080,176C1200,192,1320,192,1380,192L1440,192L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
         </svg>
-        <div>
-          <div class="guardian-title" style="color:#0369a1;">Leo</div>
-          <div class="guardian-sub">Guardião do Fato</div>
+        <div class="absolute bottom-0 left-0 w-full h-7 bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 border-t-4 border-white/60"></div>
+    </div>
+
+    <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+    <header class="relative z-20 w-full max-w-5xl mx-auto px-3 sm:px-6 pt-3 pb-1 flex items-center justify-between">
+        <div class="flex items-center gap-2 bg-white/85 backdrop-blur-md px-3 py-1.5 rounded-2xl shadow-md border-2 border-sky-300">
+            <span class="text-2xl">🏄‍♂️</span>
+            <span class="font-display font-bold text-sky-800 text-sm sm:text-base tracking-wide">PEGANDO ONDA</span>
         </div>
-      </div>
 
-      <div class="wave-card">
-        <div class="wave-card-tag" id="cardTag">DESAFIO DA ONDA</div>
-        <p class="statement-text" id="statementText">Carregando frase...</p>
-      </div>
-
-      <div class="guardian-box bia" id="guardianBia">
-        <div class="speech-bubble" id="biaBubble">Boa! Isso é Opinião!</div>
-        <svg width="65" height="65" viewBox="0 0 80 80">
-          <circle cx="40" cy="40" r="36" fill="#db2777"/>
-          <circle cx="40" cy="38" r="18" fill="#d97742"/>
-          <path d="M22,34 Q40,14 58,34" fill="#451a03"/>
-          <circle cx="34" cy="37" r="2.5" fill="#fff"/>
-          <circle cx="46" cy="37" r="2.5" fill="#fff"/>
-          <path d="M33,45 Q40,51 47,45" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-        </svg>
-        <div>
-          <div class="guardian-title" style="color:#9d174d;">Bia</div>
-          <div class="guardian-sub">Guardiã da Opinião</div>
+        <div class="flex items-center gap-2">
+            <button onclick="window.openLeaderboardModal()" class="bg-amber-400 hover:bg-amber-300 text-amber-950 font-display font-bold px-3 py-1.5 rounded-2xl shadow-md border-2 border-amber-200 flex items-center gap-1.5 text-sm sm:text-base transition transform active:scale-95" title="Ranking da Turma">
+                <i class="fa-solid fa-trophy text-amber-800"></i>
+                <span class="hidden sm:inline">Ranking</span>
+            </button>
+            <button id="soundToggleBtn" onclick="window.toggleSound()" class="bg-white/90 hover:bg-white text-sky-700 font-bold w-10 h-10 rounded-2xl shadow-md border-2 border-sky-300 flex items-center justify-center text-lg transition transform active:scale-95" title="Ativar/Desativar Som">
+                <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+            </button>
+            <button id="homeBtn" onclick="window.returnToStart()" class="hidden bg-white/90 hover:bg-white text-rose-600 font-bold w-10 h-10 rounded-2xl shadow-md border-2 border-rose-200 items-center justify-center text-lg transition transform active:scale-95" title="Voltar ao Início">
+                <i class="fa-solid fa-house"></i>
+            </button>
         </div>
-      </div>
+    </header>
+
+    <main class="relative z-10 flex-grow flex items-center justify-center w-full max-w-5xl mx-auto px-3 sm:px-6 py-2 pb-16">
+        <section id="startScreen" class="w-full max-w-3xl bg-white/95 backdrop-blur-md rounded-3xl p-5 sm:p-8 shadow-2xl border-4 border-sky-400 text-center my-auto transition-all">
+            <div class="inline-block bg-sky-100 text-sky-800 font-extrabold text-xs sm:text-sm px-4 py-1 rounded-full border border-sky-300 mb-2">
+                🌊 DESAFIO INTERATIVO DE LÍNGUA PORTUGUESA
+            </div>
+
+            <h1 class="font-display text-3xl sm:text-5xl font-bold text-sky-900 leading-tight mb-2">
+                Pegando Onda com <br class="sm:hidden"><span class="text-sky-600 underline decoration-wavy decoration-amber-400">Fato</span> e <span class="text-pink-600 underline decoration-wavy decoration-amber-400">Opinião</span>
+            </h1>
+            <p class="text-slate-600 text-sm sm:text-base max-w-xl mx-auto mb-5">
+                Suba na prancha, leia as frases nas ondas e ajude nossos surfistas a fazerem manobras radicais acertando a classificação!
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6 text-left">
+                <div class="bg-gradient-to-br from-sky-50 to-blue-100 p-3.5 rounded-2xl border-2 border-sky-400 flex items-center gap-3 shadow-sm">
+                    <div class="w-16 h-20 flex-shrink-0 surfer-idle">
+                        <svg viewBox="0 0 120 150" class="w-full h-full">
+                            <path d="M25,15 C45,15 45,135 25,135 C5,135 5,15 25,15 Z" fill="#0284c7" stroke="#0369a1" stroke-width="3"/>
+                            <path d="M15,75 Q25,60 35,75 Q25,90 15,75" fill="#bae6fd"/>
+                            <circle cx="70" cy="42" r="18" fill="#d97706"/>
+                            <path d="M50,36 Q70,15 90,36 Q85,22 70,22 Q55,22 50,36" fill="#451a03"/>
+                            <circle cx="64" cy="40" r="2.5" fill="#1e293b"/>
+                            <circle cx="76" cy="40" r="2.5" fill="#1e293b"/>
+                            <path d="M64,48 Q70,54 76,48" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                            <rect x="55" y="60" width="30" height="36" rx="8" fill="#1e293b"/>
+                            <path d="M60,60 L80,60 L75,96 L65,96 Z" fill="#0284c7"/>
+                            <rect x="56" y="94" width="28" height="20" rx="4" fill="#1d4ed8"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="bg-sky-600 text-white font-display font-bold text-xs px-2.5 py-0.5 rounded-full uppercase tracking-wider">FATO (Leo)</span>
+                        <h3 class="font-bold text-sky-950 text-sm sm:text-base mt-1">O que é real e comprovável!</h3>
+                        <p class="text-xs text-slate-600 leading-snug">Dados, acontecimentos e informações que podem ser verificados por qualquer pessoa.</p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-pink-50 to-rose-100 p-3.5 rounded-2xl border-2 border-pink-400 flex items-center gap-3 shadow-sm">
+                    <div class="w-16 h-20 flex-shrink-0 surfer-idle" style="animation-delay: 0.5s;">
+                        <svg viewBox="0 0 120 150" class="w-full h-full">
+                            <path d="M95,15 C115,15 115,135 95,135 C75,135 75,15 95,15 Z" fill="#facc15" stroke="#ca8a04" stroke-width="3"/>
+                            <circle cx="95" cy="70" r="9" fill="#ec4899"/>
+                            <circle cx="95" cy="70" r="3" fill="#fef08a"/>
+                            <path d="M32,38 Q50,15 68,38 L74,72 Q50,65 26,72 Z" fill="#78350f"/>
+                            <circle cx="50" cy="42" r="18" fill="#d97706"/>
+                            <circle cx="44" cy="40" r="2.5" fill="#1e293b"/>
+                            <circle cx="56" cy="40" r="2.5" fill="#1e293b"/>
+                            <path d="M44,48 Q50,54 56,48" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                            <rect x="36" y="60" width="28" height="35" rx="8" fill="#ec4899"/>
+                            <circle cx="50" cy="76" r="6" fill="#fde047"/>
+                            <rect x="37" y="93" width="26" height="16" rx="4" fill="#db2777"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="bg-pink-600 text-white font-display font-bold text-xs px-2.5 py-0.5 rounded-full uppercase tracking-wider">OPINIÃO (Bia)</span>
+                        <h3 class="font-bold text-pink-950 text-sm sm:text-base mt-1">O que alguém sente ou acha!</h3>
+                        <p class="text-xs text-slate-600 leading-snug">Julgamentos de valor, gostos pessoais, preferências ou impressões que mudam de pessoa para pessoa.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="max-w-md mx-auto mb-5 bg-sky-50 p-4 rounded-2xl border-2 border-sky-200">
+                <label for="playerNameInput" class="block font-display font-bold text-sky-900 text-sm sm:text-base mb-1.5">
+                    🏷️ Qual é o seu Nome ou Apelido de Surfista? <span class="text-xs font-normal text-slate-500">(Opcional)</span>
+                </label>
+                <div class="flex gap-2">
+                    <input type="text" id="playerNameInput" maxlength="22" placeholder="Ex: João, Ana Radical, Rei da Onda..." class="w-full px-4 py-2.5 rounded-xl border-2 border-sky-300 focus:border-sky-500 focus:outline-none font-bold text-slate-800 text-center sm:text-left shadow-inner">
+                    <button type="button" onclick="window.generateRandomNick()" class="bg-sky-200 hover:bg-sky-300 text-sky-900 font-bold px-3.5 py-2 rounded-xl border border-sky-400 transition" title="Sortear Apelido Divertido">🎲</button>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">Se deixar em branco, criaremos um apelido radical para você aparecer no Ranking!</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-w-xl mx-auto mb-4">
+                <button onclick="window.startGame(12)" class="btn-3d-blue text-white font-display font-bold py-3.5 px-6 rounded-2xl text-lg flex flex-col items-center justify-center">
+                    <div class="flex items-center gap-2"><span>⚡ Partida Rápida</span></div>
+                    <span class="text-xs font-sans font-semibold text-sky-100">12 Ondas Sorteadas</span>
+                </button>
+                <button onclick="window.startGame(24)" class="btn-3d-emerald text-white font-display font-bold py-3.5 px-6 rounded-2xl text-lg flex flex-col items-center justify-center">
+                    <div class="flex items-center gap-2"><span>🏆 Maratona Completa</span></div>
+                    <span class="text-xs font-sans font-semibold text-emerald-100">Todas as 24 Ondas do Desafio</span>
+                </button>
+            </div>
+
+            <button onclick="window.openLeaderboardModal()" class="inline-flex items-center gap-2 text-sky-800 hover:text-sky-600 font-extrabold text-sm sm:text-base py-1.5 px-4 rounded-xl hover:bg-sky-50 transition">
+                <i class="fa-solid fa-ranking-star text-amber-500 text-lg"></i>
+                <span>Ver Placar de Escores da Turma</span>
+            </button>
+        </section>
+
+        <section id="gameScreen" class="hidden w-full max-w-4xl flex-col gap-3 my-auto">
+            <div class="grid grid-cols-3 gap-2 sm:gap-4 bg-white/90 backdrop-blur-md p-2.5 sm:p-3.5 rounded-2xl shadow-lg border-2 border-sky-300 items-center">
+                <div class="flex items-center gap-2">
+                    <div class="bg-sky-600 text-white font-display font-bold px-2.5 py-1 rounded-xl text-xs sm:text-sm shadow">Onda <span id="waveCounter">1/12</span></div>
+                    <span id="hudPlayerName" class="font-bold text-sky-950 text-xs sm:text-sm truncate hidden md:inline">Surfista</span>
+                </div>
+                <div class="text-center">
+                    <div id="comboBadge" class="inline-flex items-center gap-1 bg-amber-100 text-amber-800 border-2 border-amber-400 px-3 py-0.5 rounded-full font-display font-bold text-xs sm:text-sm transition-transform duration-300">
+                        <span>🔥 Combo:</span><span id="comboText">x1</span>
+                    </div>
+                </div>
+                <div class="text-right flex items-center justify-end gap-1.5">
+                    <span class="text-xs text-slate-500 font-bold hidden sm:inline">PONTOS:</span>
+                    <span id="scoreDisplay" class="font-display font-bold text-lg sm:text-2xl text-sky-700 bg-sky-50 px-3 py-0.5 rounded-xl border border-sky-200">0</span>
+                </div>
+            </div>
+
+            <div class="relative w-full h-24 sm:h-28 bg-gradient-to-r from-sky-600 via-sky-400 to-cyan-300 rounded-2xl border-4 border-white shadow-lg overflow-hidden flex items-center px-4">
+                <svg class="absolute inset-0 w-full h-full preserve-3d" viewBox="0 0 800 110" preserveAspectRatio="none">
+                    <path d="M 0,95 Q 200,85 400,55 T 740,22 L 800,110 L 0,110 Z" fill="#0284c7" opacity="0.45"/>
+                    <path d="M 0,100 Q 260,85 520,45 T 760,20" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="12 8" opacity="0.8"/>
+                    <circle cx="760" cy="22" r="14" fill="#ffffff" opacity="0.9"/>
+                    <circle cx="742" cy="28" r="10" fill="#ffffff" opacity="0.8"/>
+                    <circle cx="775" cy="30" r="11" fill="#ffffff" opacity="0.8"/>
+                </svg>
+                <div class="absolute right-3 top-2 z-10 flex flex-col items-center">
+                    <span class="text-xl sm:text-2xl drop-shadow">🏁</span>
+                    <span class="text-[10px] font-extrabold text-white bg-sky-900/70 px-1.5 rounded">CRISTA</span>
+                </div>
+                <div id="maneuverToast" class="opacity-0 transition-all duration-300 absolute left-1/2 -translate-x-1/2 top-1.5 z-30 bg-amber-400 text-amber-950 font-display font-bold text-xs sm:text-sm px-3 py-0.5 rounded-full shadow-md border border-white">🌊 Manobra Radical! +100</div>
+                <div id="surferTrackNode" class="absolute z-20 transition-all duration-700 ease-out" style="left: 4%; bottom: 10px;">
+                    <div id="surferBoardSprite" class="board-idle relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                        <div id="boardSplash" class="hidden absolute -bottom-1 -left-2 w-16 h-8 pointer-events-none">
+                            <span class="absolute left-0 bottom-0 w-4 h-4 bg-white rounded-full animate-ping"></span>
+                            <span class="absolute right-0 bottom-1 w-5 h-5 bg-sky-100 rounded-full animate-ping"></span>
+                        </div>
+                        <svg viewBox="0 0 120 100" class="w-full h-full drop-shadow-md">
+                            <ellipse cx="60" cy="86" rx="38" ry="6" fill="rgba(2, 132, 199, 0.45)"/>
+                            <path d="M12,78 Q60,62 108,72 Q92,88 12,78 Z" fill="#fde047" stroke="#ca8a04" stroke-width="3"/>
+                            <path d="M30,76 Q60,69 90,73" fill="none" stroke="#ec4899" stroke-width="3"/>
+                            <path d="M46,72 L53,52 L67,52 L73,70" fill="none" stroke="#1e293b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M52,52 L60,34" stroke="#0284c7" stroke-width="11" stroke-linecap="round"/>
+                            <path d="M40,38 L60,36 L78,30" fill="none" stroke="#d97706" stroke-width="4.5" stroke-linecap="round"/>
+                            <circle cx="62" cy="22" r="9.5" fill="#d97706"/>
+                            <path d="M52,19 Q62,8 72,19" fill="#451a03"/>
+                            <path d="M6,79 Q15,73 22,82 Q12,86 6,79 Z" fill="#ffffff"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 items-center my-1">
+                <div class="md:col-span-3 flex md:flex-col items-center justify-center bg-white/85 backdrop-blur-sm p-2.5 sm:p-3 rounded-2xl border-2 border-sky-300 shadow-md order-2 md:order-1">
+                    <div class="bg-sky-600 text-white font-display font-bold text-xs sm:text-sm px-3 py-0.5 rounded-full shadow-sm mb-1 hidden md:inline-block">FATO</div>
+                    <div id="boyCharacter" class="surfer-idle w-24 h-28 sm:w-32 sm:h-40 relative flex items-center justify-center">
+                        <div id="boySpeech" class="hidden absolute -top-3 bg-sky-600 text-white font-display font-bold text-[11px] px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap z-20 animate-bounce">Isso mesmo! É Fato! 🏄‍♂️</div>
+                        <svg viewBox="0 0 160 200" class="w-full h-full drop-shadow">
+                            <g transform="translate(10, 10)">
+                                <path d="M32,5 C62,5 62,175 32,175 C2,175 2,5 32,5 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="4"/>
+                                <path d="M12,95 C20,75 40,75 45,90 C32,85 25,100 48,110 C32,125 15,115 12,95 Z" fill="#0284c7"/>
+                                <path d="M18,130 L46,130" stroke="#0369a1" stroke-width="4" stroke-linecap="round"/>
+                            </g>
+                            <g id="boyBodyGroup" transform="translate(45, 25)">
+                                <rect x="33" y="115" width="10" height="42" rx="5" fill="#d97706"/>
+                                <rect x="53" y="115" width="10" height="42" rx="5" fill="#d97706"/>
+                                <path id="boyArmLeft" d="M30,68 Q10,80 5,90" fill="none" stroke="#d97706" stroke-width="9" stroke-linecap="round"/>
+                                <path id="boyArmRight" d="M66,68 Q85,82 72,98" fill="none" stroke="#d97706" stroke-width="9" stroke-linecap="round"/>
+                                <rect x="28" y="60" width="40" height="42" rx="10" fill="#0f172a"/>
+                                <path d="M35,60 L61,60 L57,102 L39,102 Z" fill="#0284c7"/>
+                                <path d="M28,64 L20,76" stroke="#0284c7" stroke-width="10" stroke-linecap="round"/>
+                                <path d="M68,64 L76,76" stroke="#0284c7" stroke-width="10" stroke-linecap="round"/>
+                                <rect x="29" y="98" width="38" height="24" rx="5" fill="#1d4ed8"/>
+                                <line x1="48" y1="104" x2="48" y2="122" stroke="#93c5fd" stroke-width="2"/>
+                                <circle cx="48" cy="34" r="22" fill="#d97706"/>
+                                <path d="M24,30 Q30,5 52,8 Q72,10 74,30 Q65,18 48,20 Q32,18 24,30 Z" fill="#451a03"/>
+                                <path d="M28,18 L35,8 L45,15 L56,6 L62,16" fill="#451a03"/>
+                                <circle cx="40" cy="34" r="3" fill="#0f172a"/><circle cx="56" cy="34" r="3" fill="#0f172a"/>
+                                <circle cx="41" cy="33" r="1" fill="#ffffff"/><circle cx="57" cy="33" r="1" fill="#ffffff"/>
+                                <path id="boyMouth" d="M40,43 Q48,51 56,43 Z" fill="#ffffff" stroke="#9a3412" stroke-width="1.5"/>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="ml-3 md:ml-0 text-left md:text-center">
+                        <p class="font-display font-bold text-sky-900 text-xs sm:text-sm">Leo (Guardião do Fato)</p>
+                        <p class="text-[11px] text-slate-600">Pode ser provado e verificado!</p>
+                    </div>
+                </div>
+
+                <div class="md:col-span-6 order-1 md:order-2">
+                    <div class="wave-card rounded-3xl p-5 sm:p-7 text-center relative overflow-hidden min-h-[210px] sm:min-h-[240px] flex flex-col items-center justify-center">
+                        <div class="absolute -top-6 -left-6 w-24 h-24 bg-sky-100 rounded-full opacity-70 pointer-events-none"></div>
+                        <div class="absolute -bottom-6 -right-6 w-28 h-28 bg-cyan-100 rounded-full opacity-70 pointer-events-none"></div>
+                        <span class="relative z-10 text-xs font-extrabold uppercase tracking-widest text-sky-600 bg-sky-100 px-3 py-1 rounded-full mb-3 border border-sky-200">🌊 Leia a frase na onda:</span>
+                        <h2 id="questionText" class="relative z-10 font-display text-xl sm:text-2xl md:text-3xl font-bold text-slate-800 leading-snug my-2 px-2">"O surf é um esporte praticado no mar com o uso de uma prancha."</h2>
+                    </div>
+
+                    <div id="answerButtonsContainer" class="grid grid-cols-2 gap-3 sm:gap-5 mt-4">
+                        <button id="btnFact" onclick="window.submitAnswer('FATO')" class="btn-3d-blue text-white font-display font-bold py-4 px-4 rounded-2xl text-xl sm:text-2xl flex flex-col items-center justify-center gap-1 group">
+                            <div class="flex items-center gap-2"><i class="fa-solid fa-magnifying-glass-check text-sky-200 group-hover:scale-110 transition"></i><span>FATO</span></div>
+                            <span class="text-[11px] sm:text-xs font-sans font-semibold text-sky-100">É comprovável / real</span>
+                        </button>
+                        <button id="btnOpinion" onclick="window.submitAnswer('OPINIAO')" class="btn-3d-pink text-white font-display font-bold py-4 px-4 rounded-2xl text-xl sm:text-2xl flex flex-col items-center justify-center gap-1 group">
+                            <div class="flex items-center gap-2"><i class="fa-solid fa-heart text-pink-200 group-hover:scale-110 transition"></i><span>OPINIÃO</span></div>
+                            <span class="text-[11px] sm:text-xs font-sans font-semibold text-pink-100">É ponto de vista / gosto</span>
+                        </button>
+                    </div>
+
+                    <div id="feedbackPanel" class="hidden mt-4 rounded-2xl p-4 sm:p-5 border-4 shadow-xl transition-all">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                            <div class="text-center sm:text-left">
+                                <div class="flex items-center justify-center sm:justify-start gap-2 mb-1">
+                                    <span id="feedbackIcon" class="text-2xl">🎉</span>
+                                    <h3 id="feedbackTitle" class="font-display font-bold text-lg sm:text-xl">Na crista da onda! Você acertou!</h3>
+                                </div>
+                                <p id="feedbackExplanation" class="text-sm sm:text-base font-semibold leading-snug"></p>
+                            </div>
+                            <button id="nextWaveBtn" onclick="window.nextQuestion()" class="btn-3d-yellow text-amber-950 font-display font-bold py-3 px-6 rounded-2xl text-base sm:text-lg whitespace-nowrap flex items-center gap-2 flex-shrink-0"><span>Próxima Onda</span><span>🌊</span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:col-span-3 flex md:flex-col items-center justify-center bg-white/85 backdrop-blur-sm p-2.5 sm:p-3 rounded-2xl border-2 border-pink-300 shadow-md order-3">
+                    <div class="bg-pink-600 text-white font-display font-bold text-xs sm:text-sm px-3 py-0.5 rounded-full shadow-sm mb-1 hidden md:inline-block">OPINIÃO</div>
+                    <div id="girlCharacter" class="surfer-idle w-24 h-28 sm:w-32 sm:h-40 relative flex items-center justify-center" style="animation-delay: 0.4s;">
+                        <div id="girlSpeech" class="hidden absolute -top-3 bg-pink-600 text-white font-display font-bold text-[11px] px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap z-20 animate-bounce">Show! É uma Opinião! 🌸</div>
+                        <svg viewBox="0 0 160 200" class="w-full h-full drop-shadow">
+                            <g transform="translate(88, 10)">
+                                <path d="M32,5 C62,5 62,175 32,175 C2,175 2,5 32,5 Z" fill="#fde047" stroke="#eab308" stroke-width="4"/>
+                                <circle cx="32" cy="70" r="12" fill="#ec4899"/>
+                                <circle cx="24" cy="62" r="8" fill="#f472b6"/>
+                                <circle cx="40" cy="62" r="8" fill="#f472b6"/>
+                                <circle cx="24" cy="78" r="8" fill="#f472b6"/>
+                                <circle cx="40" cy="78" r="8" fill="#f472b6"/>
+                                <circle cx="32" cy="70" r="4" fill="#fef08a"/>
+                                <path d="M22,125 Q35,110 48,125 Q35,140 22,125 Z" fill="#22c55e"/>
+                            </g>
+                            <g id="girlBodyGroup" transform="translate(15, 25)">
+                                <path d="M20,30 Q48,5 76,30 L82,88 Q48,80 14,88 Z" fill="#78350f"/>
+                                <rect x="35" y="112" width="9" height="45" rx="4.5" fill="#d97706"/>
+                                <rect x="52" y="112" width="9" height="45" rx="4.5" fill="#d97706"/>
+                                <path id="girlArmLeft" d="M30,68 Q12,82 24,98" fill="none" stroke="#d97706" stroke-width="8.5" stroke-linecap="round"/>
+                                <path id="girlArmRight" d="M66,68 Q85,80 92,90" fill="none" stroke="#d97706" stroke-width="8.5" stroke-linecap="round"/>
+                                <rect x="30" y="60" width="36" height="38" rx="10" fill="#ec4899"/>
+                                <circle cx="42" cy="75" r="5" fill="#fde047"/>
+                                <circle cx="55" cy="84" r="4" fill="#38bdf8"/>
+                                <circle cx="54" cy="69" r="3.5" fill="#a855f7"/>
+                                <rect x="31" y="95" width="34" height="20" rx="5" fill="#db2777"/>
+                                <circle cx="48" cy="34" r="21" fill="#d97706"/>
+                                <path d="M26,28 Q48,10 70,28 Q58,16 48,20 Q36,16 26,28 Z" fill="#78350f"/>
+                                <circle cx="40" cy="34" r="3" fill="#0f172a"/><circle cx="56" cy="34" r="3" fill="#0f172a"/>
+                                <circle cx="41" cy="33" r="1" fill="#ffffff"/><circle cx="57" cy="33" r="1" fill="#ffffff"/>
+                                <path id="girlMouth" d="M40,43 Q48,51 56,43 Z" fill="#ffffff" stroke="#9a3412" stroke-width="1.5"/>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="ml-3 md:ml-0 text-left md:text-center">
+                        <p class="font-display font-bold text-pink-900 text-xs sm:text-sm">Bia (Guardiã da Opinião)</p>
+                        <p class="text-[11px] text-slate-600">Expressa sentimento ou preferência!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="endScreen" class="hidden w-full max-w-3xl bg-white/95 backdrop-blur-md rounded-3xl p-5 sm:p-8 shadow-2xl border-4 border-amber-400 text-center my-auto">
+            <div class="text-5xl sm:text-6xl mb-2 animate-bounce" id="endTrophyIcon">🏆</div>
+            <h2 id="endTitle" class="font-display text-3xl sm:text-4xl font-bold text-sky-900 mb-1">Fim da Bateria de Surf!</h2>
+            <p id="endSubtitle" class="text-slate-600 font-semibold text-sm sm:text-base mb-5">Confira o seu desempenho nas ondas do conhecimento:</p>
+            <div class="grid grid-cols-3 gap-2.5 sm:gap-4 max-w-xl mx-auto mb-6">
+                <div class="bg-sky-50 p-3 rounded-2xl border-2 border-sky-300"><span class="text-xs font-bold text-sky-700 uppercase block">Pontuação</span><span id="finalScore" class="font-display text-2xl sm:text-3xl font-bold text-sky-900">0</span></div>
+                <div class="bg-emerald-50 p-3 rounded-2xl border-2 border-emerald-300"><span class="text-xs font-bold text-emerald-700 uppercase block">Acertos</span><span id="finalAccuracy" class="font-display text-2xl sm:text-3xl font-bold text-emerald-900">0/12</span></div>
+                <div class="bg-amber-50 p-3 rounded-2xl border-2 border-amber-300"><span class="text-xs font-bold text-amber-700 uppercase block">Maior Combo</span><span id="finalMaxCombo" class="font-display text-2xl sm:text-3xl font-bold text-amber-900">x1</span></div>
+            </div>
+            <div id="saveScoreStatus" class="text-xs sm:text-sm font-bold text-emerald-700 bg-emerald-100 border border-emerald-300 px-4 py-2 rounded-xl max-w-md mx-auto mb-5 flex items-center justify-center gap-2"><i class="fa-solid fa-check-circle"></i><span>Sua pontuação foi registrada no Ranking da Turma!</span></div>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button onclick="window.openLeaderboardModal()" class="btn-3d-yellow text-amber-950 font-display font-bold py-3.5 px-6 rounded-2xl text-lg flex items-center gap-2 w-full sm:w-auto justify-center"><i class="fa-solid fa-trophy"></i><span>Ver Ranking da Turma</span></button>
+                <button onclick="window.restartSameMode()" class="btn-3d-blue text-white font-display font-bold py-3.5 px-6 rounded-2xl text-lg flex items-center gap-2 w-full sm:w-auto justify-center"><i class="fa-solid fa-rotate-right"></i><span>Pegar Outra Onda</span></button>
+                <button onclick="window.returnToStart()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-display font-bold py-3.5 px-5 rounded-2xl text-base transition w-full sm:w-auto">Início</button>
+            </div>
+        </section>
+    </main>
+
+    <div id="leaderboardModal" class="hidden fixed inset-0 z-50 bg-sky-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6">
+        <div class="bg-white w-full max-w-2xl rounded-3xl border-4 border-amber-400 shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+            <div class="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 p-4 sm:p-5 flex items-center justify-between border-b-2 border-amber-500">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-2xl sm:text-3xl">🏆</span>
+                    <div>
+                        <h3 class="font-display text-xl sm:text-2xl font-bold text-amber-950 leading-none">Ranking da Turma</h3>
+                        <p class="text-xs font-bold text-amber-900 mt-0.5">Os maiores surfistas de Fato e Opinião!</p>
+                    </div>
+                </div>
+                <button onclick="window.closeLeaderboardModal()" class="bg-white/80 hover:bg-white text-amber-950 w-9 h-9 rounded-full font-bold text-lg flex items-center justify-center shadow transition"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-4 sm:p-5 overflow-y-auto flex-grow space-y-2.5" id="leaderboardList">
+                <div class="text-center py-8 text-slate-500 font-semibold"><i class="fa-solid fa-spinner fa-spin text-2xl text-sky-500 mb-2"></i><p>Carregando o placar das ondas...</p></div>
+            </div>
+            <div class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+                <span>💡 Supere seu recorde acertando combos seguidos!</span>
+                <button onclick="window.closeLeaderboardModal()" class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-4 py-1.5 rounded-xl transition">Fechar</button>
+            </div>
+        </div>
     </div>
 
-    <div class="feedback-panel" id="feedbackPanel"></div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <div class="decision-grid" id="decisionGrid">
-      <button class="choice-btn fact-btn" onclick="submitChoice('FATO')">
-        📘 FATO
-        <span class="hint">Informação real e comprovável</span>
-      </button>
-      <button class="choice-btn opinion-btn" onclick="submitChoice('OPINIAO')">
-        💭 OPINIÃO
-        <span class="hint">Sentimento, gosto ou ponto de vista</span>
-      </button>
-    </div>
+        const QUESTIONS_BANK = [
+            { text: "O surf é um esporte praticado no mar com o uso de uma prancha.", type: "FATO", explanation: "Isso é um dado real e comprovável sobre como o esporte funciona." },
+            { text: "As ondas são formadas principalmente pela ação dos ventos sobre a superfície do mar.", type: "FATO", explanation: "É um fenômeno da natureza explicado e comprovado pela ciência." },
+            { text: "O protetor solar ajuda a proteger a pele contra os raios solares.", type: "FATO", explanation: "É uma informação comprovada cientificamente pela medicina e dermatologia." },
+            { text: "Muitas praias possuem sinalização para orientar os banhistas sobre áreas perigosas.", type: "FATO", explanation: "Qualquer pessoa pode ir à praia e verificar a existência dessas placas e bandeiras." },
+            { text: "A maré pode subir ou descer ao longo do dia.", type: "FATO", explanation: "É um fenômeno natural observável e medido todos os dias." },
+            { text: "O litoral do Ceará possui várias praias visitadas por turistas.", type: "FATO", explanation: "É um dado geográfico e turístico que pode ser comprovado com mapas e registros." },
+            { text: "Alguns surfistas usam roupas próprias para proteger o corpo durante a prática do esporte.", type: "FATO", explanation: "Podemos observar e comprovar o uso dessas roupas em fotos, vídeos e praias." },
+            { text: "O salva-vidas atua na prevenção de acidentes em áreas de banho.", type: "FATO", explanation: "Descreve a função real e verificável desse profissional." },
+            { text: "A areia da praia pode ficar muito quente em dias de sol forte.", type: "FATO", explanation: "A temperatura da areia pode ser medida e comprovada fisicamente." },
+            { text: "O lixo deixado na praia pode prejudicar os animais marinhos.", type: "FATO", explanation: "É um fato comprovado por biólogos e estudos ambientais." },
+            { text: "O surf exige equilíbrio, força e atenção às ondas.", type: "FATO", explanation: "São habilidades físicas reais necessárias para ficar em pé na prancha." },
+            { text: "Em algumas praias, há campeonatos de surf durante o ano.", type: "FATO", explanation: "Eventos e campeonatos têm datas, locais e registros oficiais que comprovam sua realização." },
+            { text: "Surfar é uma das atividades mais divertidas que existem.", type: "OPINIAO", explanation: "\"Mais divertida\" é um gosto pessoal; outra pessoa pode achar futebol ou leitura mais divertido." },
+            { text: "A praia fica mais bonita no fim da tarde.", type: "OPINIAO", explanation: "A beleza depende do olhar de cada um; há quem ache a praia mais bonita pela manhã." },
+            { text: "O som das ondas é muito relaxante.", type: "OPINIAO", explanation: "Expressa uma sensação pessoal; nem todo mundo sente a mesma coisa." },
+            { text: "Aprender a surfar parece mais difícil do que nadar.", type: "OPINIAO", explanation: "A palavra \"parece\" e a ideia de dificuldade variam de acordo com a experiência de cada pessoa." },
+            { text: "O melhor lugar para passar as férias é perto do mar.", type: "OPINIAO", explanation: "\"Melhor lugar\" é uma preferência; muitas pessoas preferem passar férias na serra ou no campo." },
+            { text: "Caminhar na areia é uma sensação maravilhosa.", type: "OPINIAO", explanation: "\"Sensação maravilhosa\" é um sentimento pessoal, pois há quem não goste de areia nos pés." },
+            { text: "As praias do Ceará estão entre as mais bonitas do Brasil.", type: "OPINIAO", explanation: "Mesmo sendo lindas, dizer que são \"as mais bonitas\" é um julgamento de valor e admiração pessoal." },
+            { text: "O surf é mais emocionante do que outros esportes aquáticos.", type: "OPINIAO", explanation: "O que é \"mais emocionante\" muda de pessoa para pessoa." },
+            { text: "Ver o pôr do sol na praia é uma experiência inesquecível.", type: "OPINIAO", explanation: "\"Inesquecível\" representa uma emoção e impressão subjetiva de quem vivenciou o momento." },
+            { text: "Uma praia limpa deixa o passeio muito mais agradável.", type: "OPINIAO", explanation: "\"Mais agradável\" expressa uma avaliação e sentimento sobre o passeio." },
+            { text: "Pranchas coloridas deixam o surf mais bonito.", type: "OPINIAO", explanation: "Preferir pranchas coloridas ou brancas é uma questão de gosto estético pessoal." },
+            { text: "Tomar banho de mar é a melhor forma de aliviar o calor.", type: "OPINIAO", explanation: "É uma preferência pessoal; outros podem achar que tomar banho de chuveiro ou piscina é melhor." }
+        ];
 
-    <button class="next-wave-btn" id="nextWaveBtn" onclick="advanceWave()">
-      Pegar a Próxima Onda 🌊➡️
-    </button>
-  </section>
+        const FUN_NICKNAMES = ["Surfista Radical", "Rei da Maré", "Rainha das Ondas", "Tubarão do Surf", "Mestre da Prancha", "Onda Dourada", "Golfinho Veloz", "Brisa do Ceará", "Furacão do Mar", "Estrela da Praia", "Capitão da Crista", "Sereia do Surf"];
 
-  <!-- ==================== TELA 3: FIM E CERTIFICADO ==================== -->
-  <section id="resultScreen" class="screen">
-    <div class="certificate-box" id="certPrintArea">
-      <div style="font-size:2.8rem;">🏆🏄‍♂️🌊</div>
-      <h2 style="font-family:'Fredoka',sans-serif; color:#0369a1; font-size:1.8rem;">
-        CERTIFICADO MESTRE DAS ONDAS
-      </h2>
-      <p style="margin:10px 0; font-weight:700; color:#475569;">Certificamos que o(a) estudante surfista:</p>
-      <h1 id="certPlayerName" style="font-family:'Fredoka',sans-serif; color:#db2777; font-size:2.1rem; margin:8px 0;">
-        Surfista
-      </h1>
-      <p id="certSummary" style="font-size:1.15rem; font-weight:800; color:#0f172a; margin:12px 0;"></p>
-      <p style="font-size:0.95rem; color:#475569;">
-        Concluiu o desafio interativo <strong>"Pegando Onda com Fato e Opinião"</strong> com leitura crítica e atenção!
-      </p>
-    </div>
+        let soundEnabled = true;
+        let audioCtx = null;
 
-    <div class="mode-buttons">
-      <button class="start-btn classic" onclick="window.print()">🖨️ Imprimir / Salvar Certificado</button>
-      <button class="start-btn timed" onclick="goHome()">🏅 Ver Ranking / Jogar de Novo</button>
-    </div>
-  </section>
-</div>
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            return audioCtx;
+        }
+        function playSoundEffect(type) {
+            if (!soundEnabled) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            const now = ctx.currentTime;
+            if (type === 'correct') {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.065);
+                    gain.gain.setValueAtTime(0.18, now + idx * 0.065);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.065 + 0.28);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now + idx * 0.065); osc.stop(now + idx * 0.065 + 0.3);
+                });
+            } else if (type === 'wrong') {
+                const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(240, now);
+                osc.frequency.linearRampToValueAtTime(130, now + 0.35);
+                gain.gain.setValueAtTime(0.14, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(now); osc.stop(now + 0.4);
+            } else if (type === 'victory') {
+                const melody = [523.25, 659.25, 783.99, 659.25, 783.99, 1046.50];
+                const times = [0, 0.12, 0.24, 0.36, 0.48, 0.62];
+                melody.forEach((freq, i) => {
+                    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + times[i]);
+                    gain.gain.setValueAtTime(0.2, now + times[i]);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + times[i] + 0.35);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now + times[i]); osc.stop(now + times[i] + 0.38);
+                });
+            }
+        }
+        window.toggleSound = function () {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            if (soundEnabled) { icon.className = 'fa-solid fa-volume-high'; playSoundEffect('correct'); }
+            else { icon.className = 'fa-solid fa-volume-xmark text-slate-400'; }
+        };
 
-<script>
-  // Banco completo das 24 frases do PDF "Pegando Onda com Fato e Opinião"
-  const QUESTION_BANK = [
-    // 12 FATOS
-    { q: "O surf é um esporte praticado no mar com o uso de uma prancha.", ans: "FATO", exp: "É uma definição real e comprovável sobre como o esporte funciona." },
-    { q: "As ondas são formadas principalmente pela ação dos ventos sobre a superfície do mar.", ans: "FATO", exp: "É um fenômeno físico da natureza explicado pela ciência." },
-    { q: "O protetor solar ajuda a proteger a pele contra os raios solares.", ans: "FATO", exp: "Informação comprovada cientificamente pela medicina e saúde." },
-    { q: "Muitas praias possuem sinalização para orientar os banhistas sobre áreas perigosas.", ans: "FATO", exp: "Dado objetivo que pode ser visto e verificado nas praias." },
-    { q: "A maré pode subir ou descer ao longo do dia.", ans: "FATO", exp: "Fenômeno natural e verificável todos os dias no litoral." },
-    { q: "O litoral do Ceará possui várias praias visitadas por turistas.", ans: "FATO", exp: "Informação geográfica e turística real e comprovável." },
-    { q: "Alguns surfistas usam roupas próprias para proteger o corpo durante a prática do esporte.", ans: "FATO", exp: "Informação objetiva sobre o equipamento utilizado no surf." },
-    { q: "O salva-vidas atua na prevenção de acidentes em áreas de banho.", ans: "FATO", exp: "Descreve a profissão e a função real desse trabalhador." },
-    { q: "A areia da praia pode ficar muito quente em dias de sol forte.", ans: "FATO", exp: "Fato físico: a radiação solar aquece a areia." },
-    { q: "O lixo deixado na praia pode prejudicar os animais marinhos.", ans: "FATO", exp: "Fato comprovado pela biologia e estudos ambientais." },
-    { q: "O surf exige equilíbrio, força e atenção às ondas.", ans: "FATO", exp: "Habilidades físicas reais exigidas para ficar em pé na prancha." },
-    { q: "Em algumas praias, há campeonatos de surf durante o ano.", ans: "FATO", exp: "Evento real que consta nos calendários esportivos." },
-    // 12 OPINIÕES
-    { q: "Surfar é uma das atividades mais divertidas que existem.", ans: "OPINIAO", exp: "A palavra 'mais divertidas' mostra um gosto pessoal; cada pessoa se diverte de um jeito." },
-    { q: "A praia fica mais bonita no fim da tarde.", ans: "OPINIAO", exp: "Achar 'mais bonita' no fim da tarde é uma preferência pessoal." },
-    { q: "O som das ondas é muito relaxante.", ans: "OPINIAO", exp: "Expressa uma sensação pessoal ('muito relaxante')." },
-    { q: "Aprender a surfar parece mais difícil do que nadar.", ans: "OPINIAO", exp: "Indica uma impressão subjetiva ('parece mais difícil')." },
-    { q: "O melhor lugar para passar as férias é perto do mar.", ans: "OPINIAO", exp: "'Melhor lugar' é uma opinião; outras pessoas preferem a serra ou o sertão." },
-    { q: "Caminhar na areia é uma sensação maravilhosa.", ans: "OPINIAO", exp: "A palavra 'maravilhosa' expressa um sentimento e avaliação pessoal." },
-    { q: "As praias do Ceará estão entre as mais bonitas do Brasil.", ans: "OPINIAO", exp: "Julgamento de beleza ('mais bonitas'), que varia conforme o olhar de cada um." },
-    { q: "O surf é mais emocionante do que outros esportes aquáticos.", ans: "OPINIAO", exp: "O que é 'mais emocionante' muda de acordo com o gosto de cada pessoa." },
-    { q: "Ver o pôr do sol na praia é uma experiência inesquecível.", ans: "OPINIAO", exp: "'Inesquecível' reflete uma emoção pessoal sobre o momento." },
-    { q: "Uma praia limpa deixa o passeio muito mais agradável.", ans: "OPINIAO", exp: "Expressa uma sensação subjetiva de bem-estar ('mais agradável')." },
-    { q: "Pranchas coloridas deixam o surf mais bonito.", ans: "OPINIAO", exp: "Preferência estética sobre cores e beleza." },
-    { q: "Tomar banho de mar é a melhor forma de aliviar o calor.", ans: "OPINIAO", exp: "Ponto de vista pessoal; outros preferem banho de chuveiro ou piscina." }
-  ];
+        let db = null; let auth = null; let currentUser = null; let leaderboardData = []; let lastSavedDocId = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pegando-onda-fato-opiniao';
 
-  const WAVES_PER_MATCH = 12;
-  let matchQuestions = [];
-  let currentWave = 0;
-  let points = 0;
-  let correctHits = 0;
-  let comboStreak = 0;
-  let isTimedMode = false;
-  let timerRef = null;
-  let secondsLeft = 15;
-  let audioEnabled = true;
-  let activePlayer = "Surfista Radical";
+        async function initFirebase() {
+            try {
+                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app);
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
+                    else await signInAnonymously(auth);
+                    onAuthStateChanged(auth, (user) => { currentUser = user; if (user) subscribeToLeaderboard(); });
+                } else {
+                    renderLeaderboardUI();
+                }
+            } catch (err) {
+                console.warn('Modo offline do Placar ativado:', err); renderLeaderboardUI();
+            }
+        }
 
-  function playSound(type) {
-    if (!audioEnabled) return;
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      if (type === "hit") {
-        osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.22);
-        gain.gain.setValueAtTime(0.25, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.28);
-      } else {
-        osc.type = "sawtooth";
-        osc.frequency.setValueAtTime(220, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(130, ctx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.2, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.32);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.32);
-      }
-    } catch (e) {}
-  }
+        function subscribeToLeaderboard() {
+            if (!currentUser || !db) return;
+            const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+            onSnapshot(scoresRef, (snapshot) => {
+                const items = [];
+                snapshot.forEach((docSnap) => items.push({ id: docSnap.id, ...docSnap.data() }));
+                items.sort((a, b) => ((b.score || 0) !== (a.score || 0) ? (b.score || 0) - (a.score || 0) : (b.maxCombo || 0) - (a.maxCombo || 0)));
+                leaderboardData = items; renderLeaderboardUI();
+            }, (error) => console.error('Erro ao sincronizar ranking:', error));
+        }
 
-  function toggleAudio() {
-    audioEnabled = !audioEnabled;
-    document.getElementById("soundToggleBtn").textContent = audioEnabled ? "🔊 Som: ON" : "🔇 Som: OFF";
-  }
+        async function savePlayerScore(playerName, score, correctCount, totalWaves, maxCombo) {
+            const entry = { playerName, score, correctCount, totalWaves, maxCombo, userId: currentUser ? currentUser.uid : 'local-player', timestamp: Date.now() };
+            if (currentUser && db) {
+                try {
+                    const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+                    const docRef = await addDoc(scoresRef, entry); lastSavedDocId = docRef.id;
+                } catch (err) { console.error('Erro ao salvar no Firestore:', err); }
+            } else {
+                entry.id = 'local-' + Date.now();
+                lastSavedDocId = entry.id; leaderboardData.push(entry); leaderboardData.sort((a, b) => (b.score || 0) - (a.score || 0)); renderLeaderboardUI();
+            }
+        }
 
-  function rollNickname() {
-    const first = ["Tubarão", "Sereia", "Falcão", "Raio", "Mestre", "Capitão", "Guardião", "Estrela"];
-    const second = ["do Cumbuco", "das Ondas", "do Ceará", "Radical", "Solar", "do Mar", "Veloz"];
-    const nick = first[Math.floor(Math.random() * first.length)] + " " + second[Math.floor(Math.random() * second.length)];
-    document.getElementById("playerNameInput").value = nick;
-  }
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[m]);
+        }
 
-  function initMatch(timed) {
-    const rawName = document.getElementById("playerNameInput").value.trim();
-    activePlayer = rawName || "Surfista Anônimo";
-    isTimedMode = timed;
-    points = 0;
-    correctHits = 0;
-    comboStreak = 0;
-    currentWave = 0;
+        function renderLeaderboardUI() {
+            const container = document.getElementById('leaderboardList'); if (!container) return;
+            if (!leaderboardData || leaderboardData.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 px-4 bg-sky-50 rounded-2xl border-2 border-dashed border-sky-200"><div class="text-4xl mb-2">🏄‍♀️</div><p class="font-display font-bold text-sky-900 text-lg">O mar está calmo por enquanto!</p><p class="text-sm text-slate-600">Jogue a primeira partida da turma para inaugurar o Placar de Escores!</p></div>`;
+                return;
+            }
+            container.innerHTML = leaderboardData.slice(0, 30).map((item, idx) => {
+                const rank = idx + 1; let medal = `<span class="font-display font-bold text-slate-500 w-7 text-center">${rank}º</span>`; let rowStyle = 'bg-white border-slate-200';
+                if (rank === 1) { medal = '<span class="text-2xl w-7 text-center">🥇</span>'; rowStyle = 'bg-gradient-to-r from-amber-50 to-yellow-100 border-amber-400'; }
+                else if (rank === 2) { medal = '<span class="text-2xl w-7 text-center">🥈</span>'; rowStyle = 'bg-gradient-to-r from-slate-50 to-slate-100 border-slate-300'; }
+                else if (rank === 3) { medal = '<span class="text-2xl w-7 text-center">🥉</span>'; rowStyle = 'bg-gradient-to-r from-orange-50 to-amber-50 border-orange-300'; }
+                const isCurrentPlayer = (item.id && item.id === lastSavedDocId); if (isCurrentPlayer) rowStyle = 'bg-gradient-to-r from-sky-100 to-cyan-100 border-sky-500 ring-2 ring-sky-400';
+                return `<div class="flex items-center justify-between p-3 rounded-2xl border-2 ${rowStyle} shadow-sm transition"><div class="flex items-center gap-3 min-w-0">${medal}<div class="min-w-0"><div class="flex items-center gap-1.5"><p class="font-display font-bold text-slate-800 text-sm sm:text-base truncate">${escapeHtml(item.playerName || 'Surfista')}</p>${isCurrentPlayer ? '<span class="bg-sky-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full">VOCÊ</span>' : ''}</div><p class="text-xs text-slate-500 font-semibold">✅ Acertos: ${item.correctCount || 0}/${item.totalWaves || 12} &bull; 🔥 Combo Máx: x${item.maxCombo || 1}</p></div></div><div class="text-right flex-shrink-0 ml-2"><span class="font-display font-bold text-lg sm:text-xl text-sky-700">${item.score || 0}</span><span class="block text-[10px] font-bold text-slate-400 uppercase">pontos</span></div></div>`;
+            }).join('');
+        }
 
-    // Sorteia 6 Fatos e 6 Opiniões para equilibrar a partida de 12 ondas
-    const facts = QUESTION_BANK.filter(i => i.ans === "FATO").sort(() => Math.random() - 0.5).slice(0, 6);
-    const opinions = QUESTION_BANK.filter(i => i.ans === "OPINIAO").sort(() => Math.random() - 0.5).slice(0, 6);
-    matchQuestions = [...facts, ...opinions].sort(() => Math.random() - 0.5);
+        let currentQuestions = []; let currentQuestionIndex = 0; let currentModeCount = 12; let playerName = ''; let score = 0; let combo = 0; let maxCombo = 1; let correctAnswersCount = 0; let isWaitingNext = false;
 
-    document.getElementById("homeScreen").classList.remove("active");
-    document.getElementById("resultScreen").classList.remove("active");
-    document.getElementById("playScreen").classList.add("active");
-    document.getElementById("timerWrap").style.display = isTimedMode ? "block" : "none";
+        window.generateRandomNick = function () { const input = document.getElementById('playerNameInput'); const randomNick = FUN_NICKNAMES[Math.floor(Math.random() * FUN_NICKNAMES.length)]; input.value = randomNick; };
 
-    renderWave();
-  }
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1)); [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
 
-  function renderWave() {
-    const item = matchQuestions[currentWave];
-    document.getElementById("hudSurfer").textContent = "🏄 " + activePlayer;
-    document.getElementById("hudWaveCount").textContent = `🌊 Onda ${currentWave + 1} / ${WAVES_PER_MATCH}`;
-    document.getElementById("hudCombo").textContent = `🔥 Combo: ${comboStreak}x`;
-    document.getElementById("hudPoints").textContent = `⭐ ${points} pts`;
+        window.startGame = function (waveCount) {
+            currentModeCount = waveCount;
+            const nameInput = document.getElementById('playerNameInput').value.trim();
+            playerName = nameInput || FUN_NICKNAMES[Math.floor(Math.random() * FUN_NICKNAMES.length)];
+            if (waveCount === 12) {
+                const facts = shuffleArray(QUESTIONS_BANK.filter(q => q.type === 'FATO')).slice(0, 6);
+                const opinions = shuffleArray(QUESTIONS_BANK.filter(q => q.type === 'OPINIAO')).slice(0, 6);
+                currentQuestions = shuffleArray([...facts, ...opinions]);
+            } else {
+                currentQuestions = shuffleArray(QUESTIONS_BANK);
+            }
+            currentQuestionIndex = 0; score = 0; combo = 0; maxCombo = 1; correctAnswersCount = 0; isWaitingNext = false;
+            document.getElementById('hudPlayerName').textContent = playerName;
+            document.getElementById('scoreDisplay').textContent = '0';
+            updateComboUI(1); updateSurferTrackPosition(0, currentQuestions.length);
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('endScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('gameScreen').classList.add('flex');
+            document.getElementById('homeBtn').classList.remove('hidden');
+            document.getElementById('homeBtn').classList.add('flex');
+            loadCurrentQuestion();
+        };
 
-    document.getElementById("cardTag").textContent = `DESAFIO DA ONDA #${currentWave + 1}`;
-    document.getElementById("statementText").textContent = `"${item.q}"`;
+        window.restartSameMode = function () { window.startGame(currentModeCount); };
+        window.returnToStart = function () {
+            document.getElementById('gameScreen').classList.add('hidden'); document.getElementById('gameScreen').classList.remove('flex');
+            document.getElementById('endScreen').classList.add('hidden'); document.getElementById('homeBtn').classList.add('hidden'); document.getElementById('homeBtn').classList.remove('flex');
+            document.getElementById('startScreen').classList.remove('hidden');
+        };
 
-    document.getElementById("feedbackPanel").style.display = "none";
-    document.getElementById("nextWaveBtn").style.display = "none";
-    document.getElementById("decisionGrid").style.pointerEvents = "auto";
-    document.getElementById("guardianLeo").classList.remove("cheer");
-    document.getElementById("guardianBia").classList.remove("cheer");
+        function loadCurrentQuestion() {
+            isWaitingNext = false; const q = currentQuestions[currentQuestionIndex];
+            document.getElementById('waveCounter').textContent = `${currentQuestionIndex + 1}/${currentQuestions.length}`;
+            document.getElementById('questionText').textContent = `"${q.text}"`;
+            document.getElementById('answerButtonsContainer').classList.remove('hidden');
+            document.getElementById('feedbackPanel').classList.add('hidden');
+            resetCharactersState();
+        }
 
-    const surfer = document.getElementById("surferAvatar");
-    surfer.className = "surfer-vessel";
-    const pct = 5 + (currentWave / WAVES_PER_MATCH) * 76;
-    surfer.style.left = pct + "%";
+        window.submitAnswer = function (selectedType) {
+            if (isWaitingNext) return;
+            isWaitingNext = true;
+            const currentQ = currentQuestions[currentQuestionIndex]; const isCorrect = (selectedType === currentQ.type);
+            if (isCorrect) {
+                combo++; if (combo > maxCombo) maxCombo = combo; correctAnswersCount++;
+                const pointsEarned = 100 * combo; score += pointsEarned; playSoundEffect('correct');
+                document.getElementById('scoreDisplay').textContent = score; updateComboUI(combo); updateSurferTrackPosition(currentQuestionIndex + 1, currentQuestions.length); triggerBoardManeuver(true, pointsEarned); animateCharacterReaction(currentQ.type, true); showFeedbackModal(true, currentQ); fireConfetti(35);
+            } else {
+                combo = 0; playSoundEffect('wrong'); updateComboUI(1); triggerBoardManeuver(false, 0); animateCharacterReaction(currentQ.type, false); showFeedbackModal(false, currentQ);
+            }
+        };
 
-    if (isTimedMode) startWaveTimer();
-  }
+        function updateComboUI(multiplier) {
+            const badge = document.getElementById('comboBadge'); const text = document.getElementById('comboText'); const displayMult = Math.max(1, multiplier); text.textContent = `x${displayMult}`;
+            if (displayMult >= 3) badge.className = 'inline-flex items-center gap-1 bg-rose-500 text-white border-2 border-yellow-300 px-3 py-0.5 rounded-full font-display font-bold text-xs sm:text-sm scale-110 shadow-md transition-transform duration-300';
+            else if (displayMult === 2) badge.className = 'inline-flex items-center gap-1 bg-amber-400 text-amber-950 border-2 border-white px-3 py-0.5 rounded-full font-display font-bold text-xs sm:text-sm scale-105 transition-transform duration-300';
+            else badge.className = 'inline-flex items-center gap-1 bg-amber-100 text-amber-800 border-2 border-amber-400 px-3 py-0.5 rounded-full font-display font-bold text-xs sm:text-sm transition-transform duration-300';
+        }
 
-  function startWaveTimer() {
-    clearInterval(timerRef);
-    secondsLeft = 15;
-    const fill = document.getElementById("timerFill");
-    fill.style.width = "100%";
+        function updateSurferTrackPosition(step, total) {
+            const node = document.getElementById('surferTrackNode');
+            const pct = 4 + Math.round((step / total) * 80);
+            const bottomPx = 10 + Math.round((step / total) * 26);
+            node.style.left = `${pct}%`; node.style.bottom = `${bottomPx}px`;
+        }
 
-    timerRef = setInterval(() => {
-      secondsLeft--;
-      fill.style.width = ((secondsLeft / 15) * 100) + "%";
-      if (secondsLeft <= 0) {
-        clearInterval(timerRef);
-        submitChoice("TIMEOUT");
-      }
-    }, 1000);
-  }
+        function triggerBoardManeuver(isSuccess, pointsEarned) {
+            const sprite = document.getElementById('surferBoardSprite'); const splash = document.getElementById('boardSplash'); const toast = document.getElementById('maneuverToast');
+            sprite.classList.remove('board-idle', 'board-maneuver', 'board-wobble'); void sprite.offsetWidth;
+            if (isSuccess) {
+                sprite.classList.add('board-maneuver'); splash.classList.remove('hidden');
+                toast.textContent = `🌊 Manobra Radical! +${pointsEarned} pts`;
+                toast.className = 'opacity-100 transition-all duration-300 absolute left-1/2 -translate-x-1/2 top-1.5 z-30 bg-amber-400 text-amber-950 font-display font-bold text-xs sm:text-sm px-3 py-0.5 rounded-full shadow-md border border-white';
+            } else {
+                sprite.classList.add('board-wobble');
+                toast.textContent = '💦 Quase caiu da prancha!';
+                toast.className = 'opacity-100 transition-all duration-300 absolute left-1/2 -translate-x-1/2 top-1.5 z-30 bg-rose-500 text-white font-display font-bold text-xs sm:text-sm px-3 py-0.5 rounded-full shadow-md border border-white';
+            }
+            setTimeout(() => { sprite.classList.remove('board-maneuver', 'board-wobble'); sprite.classList.add('board-idle'); splash.classList.add('hidden'); toast.classList.replace('opacity-100', 'opacity-0'); }, 1100);
+        }
 
-  function submitChoice(userPick) {
-    clearInterval(timerRef);
-    document.getElementById("decisionGrid").style.pointerEvents = "none";
+        function resetCharactersState() {
+            const boy = document.getElementById('boyCharacter'); const girl = document.getElementById('girlCharacter');
+            boy.className = 'surfer-idle w-24 h-28 sm:w-32 sm:h-40 relative flex items-center justify-center';
+            girl.className = 'surfer-idle w-24 h-28 sm:w-32 sm:h-40 relative flex items-center justify-center';
+            document.getElementById('boySpeech').classList.add('hidden'); document.getElementById('girlSpeech').classList.add('hidden');
+            document.getElementById('boyArmRight').setAttribute('d', 'M66,68 Q85,82 72,98');
+            document.getElementById('boyMouth').setAttribute('d', 'M40,43 Q48,51 56,43 Z');
+            document.getElementById('girlArmLeft').setAttribute('d', 'M30,68 Q12,82 24,98');
+            document.getElementById('girlMouth').setAttribute('d', 'M40,43 Q48,51 56,43 Z');
+        }
 
-    const item = matchQuestions[currentWave];
-    const fb = document.getElementById("feedbackPanel");
-    const surfer = document.getElementById("surferAvatar");
+        function animateCharacterReaction(correctType, playerGotItRight) {
+            const boy = document.getElementById('boyCharacter'); const girl = document.getElementById('girlCharacter');
+            const boySpeech = document.getElementById('boySpeech'); const girlSpeech = document.getElementById('girlSpeech');
+            if (playerGotItRight) {
+                if (correctType === 'FATO') {
+                    boy.classList.remove('surfer-idle'); boy.classList.add('surfer-celebrate');
+                    document.getElementById('boyArmRight').setAttribute('d', 'M66,68 Q88,40 82,20');
+                    boySpeech.textContent = 'Mandou bem! É FATO! 🏄‍♂️'; boySpeech.classList.remove('hidden');
+                } else {
+                    girl.classList.remove('surfer-idle'); girl.classList.add('surfer-celebrate');
+                    document.getElementById('girlArmLeft').setAttribute('d', 'M30,68 Q8,40 14,20');
+                    girlSpeech.textContent = 'Show! É OPINIÃO! 🌸'; girlSpeech.classList.remove('hidden');
+                }
+            } else {
+                if (correctType === 'FATO') {
+                    boy.classList.remove('surfer-idle'); boy.classList.add('surfer-doubt');
+                    document.getElementById('boyMouth').setAttribute('d', 'M42,46 Q48,42 54,46');
+                    boySpeech.textContent = 'Olha só: essa é FATO! 🔍'; boySpeech.classList.remove('hidden');
+                } else {
+                    girl.classList.remove('surfer-idle'); girl.classList.add('surfer-doubt');
+                    document.getElementById('girlMouth').setAttribute('d', 'M42,46 Q48,42 54,46');
+                    girlSpeech.textContent = 'Essa é uma OPINIÃO! 💭'; girlSpeech.classList.remove('hidden');
+                }
+            }
+        }
 
-    if (userPick === item.ans) {
-      correctHits++;
-      comboStreak++;
-      const speedBonus = isTimedMode ? secondsLeft * 3 : 0;
-      points += 100 + (comboStreak * 20) + speedBonus;
-      playSound("hit");
+        function showFeedbackModal(isCorrect, questionObj) {
+            document.getElementById('answerButtonsContainer').classList.add('hidden');
+            const panel = document.getElementById('feedbackPanel'); const icon = document.getElementById('feedbackIcon'); const title = document.getElementById('feedbackTitle'); const exp = document.getElementById('feedbackExplanation'); const nextBtn = document.getElementById('nextWaveBtn');
+            panel.classList.remove('hidden'); const labelType = questionObj.type === 'FATO' ? 'FATO' : 'OPINIÃO';
+            if (isCorrect) {
+                panel.className = 'mt-4 rounded-2xl p-4 sm:p-5 border-4 bg-emerald-50 border-emerald-400 text-emerald-950 shadow-xl transition-all';
+                icon.textContent = '🎉'; title.textContent = `Manobra Perfeita! É ${labelType}!`;
+            } else {
+                panel.className = 'mt-4 rounded-2xl p-4 sm:p-5 border-4 bg-amber-50 border-amber-400 text-amber-950 shadow-xl transition-all';
+                icon.textContent = '💡'; title.textContent = `Quase lá! Essa frase é ${labelType}.`;
+            }
+            exp.textContent = questionObj.explanation;
+            if (currentQuestionIndex + 1 >= currentQuestions.length) nextBtn.innerHTML = '<span>Ver Resultado</span> <span>🏆</span>';
+            else nextBtn.innerHTML = '<span>Próxima Onda</span> <span>🌊</span>';
+        }
 
-      surfer.classList.add("maneuver");
-      if (item.ans === "FATO") {
-        document.getElementById("guardianLeo").classList.add("cheer");
-      } else {
-        document.getElementById("guardianBia").classList.add("cheer");
-      }
+        window.nextQuestion = function () {
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= currentQuestions.length) finishGame();
+            else loadCurrentQuestion();
+        };
 
-      fb.className = "feedback-panel ok";
-      fb.innerHTML = `✅ <strong>Manobra Radical! É ${item.ans === "FATO" ? "UM FATO" : "UMA OPINIÃO"}!</strong><br>${item.exp}`;
-    } else {
-      comboStreak = 0;
-      playSound("err");
-      surfer.classList.add("wipeout");
+        async function finishGame() {
+            playSoundEffect('victory'); fireConfetti(90);
+            document.getElementById('gameScreen').classList.add('hidden'); document.getElementById('gameScreen').classList.remove('flex');
+            document.getElementById('endScreen').classList.remove('hidden');
+            const total = currentQuestions.length; const pct = Math.round((correctAnswersCount / total) * 100);
+            document.getElementById('finalScore').textContent = score; document.getElementById('finalAccuracy').textContent = `${correctAnswersCount}/${total}`; document.getElementById('finalMaxCombo').textContent = `x${maxCombo}`;
+            const titleEl = document.getElementById('endTitle'); const subEl = document.getElementById('endSubtitle'); const trophyEl = document.getElementById('endTrophyIcon');
+            if (pct === 100) { trophyEl.textContent = '👑'; titleEl.textContent = `Lenda do Surf, ${playerName}!`; subEl.textContent = 'Você dominou 100% das ondas sem cair nenhuma vez!'; }
+            else if (pct >= 75) { trophyEl.textContent = '🏆'; titleEl.textContent = `Mestre das Ondas, ${playerName}!`; subEl.textContent = 'Excelente equilíbrio entre Fato e Opinião!'; }
+            else { trophyEl.textContent = '🏄‍♂️'; titleEl.textContent = `Boa Bateria, ${playerName}!`; subEl.textContent = 'Continue praticando nas ondas para bater seu recorde no Ranking!'; }
+            await savePlayerScore(playerName, score, correctAnswersCount, total, maxCombo);
+        }
 
-      fb.className = "feedback-panel err";
-      const prefix = userPick === "TIMEOUT" ? "⏰ O tempo acabou!" : "❌ Quase caiu da prancha!";
-      fb.innerHTML = `${prefix} O correto é <strong>${item.ans === "FATO" ? "FATO" : "OPINIÃO"}</strong>.<br>${item.exp}`;
-    }
+        window.openLeaderboardModal = function () { renderLeaderboardUI(); document.getElementById('leaderboardModal').classList.remove('hidden'); };
+        window.closeLeaderboardModal = function () { document.getElementById('leaderboardModal').classList.add('hidden'); };
 
-    document.getElementById("hudCombo").textContent = `🔥 Combo: ${comboStreak}x`;
-    document.getElementById("hudPoints").textContent = `⭐ ${points} pts`;
-    fb.style.display = "block";
-    document.getElementById("nextWaveBtn").style.display = "block";
-  }
+        const confettiCanvas = document.getElementById('confettiCanvas'); const cCtx = confettiCanvas.getContext('2d'); let confettiParticles = [];
+        function resizeConfettiCanvas() { confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeConfettiCanvas); resizeConfettiCanvas();
+        function fireConfetti(amount = 40) {
+            const colors = ['#38bdf8', '#f472b6', '#facc15', '#34d399', '#fb923c'];
+            for (let i = 0; i < amount; i++) confettiParticles.push({ x: window.innerWidth / 2 + (Math.random() - 0.5) * 200, y: window.innerHeight / 2, vx: (Math.random() - 0.5) * 12, vy: -Math.random() * 12 - 4, size: Math.random() * 8 + 5, color: colors[Math.floor(Math.random() * colors.length)], rotation: Math.random() * 360, vRot: (Math.random() - 0.5) * 10 });
+        }
+        function updateConfetti() { cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); for (let i = confettiParticles.length - 1; i >= 0; i--) { const p = confettiParticles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.35; p.rotation += p.vRot; cCtx.save(); cCtx.translate(p.x, p.y); cCtx.rotate((p.rotation * Math.PI) / 180); cCtx.fillStyle = p.color; cCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size); cCtx.restore(); if (p.y > confettiCanvas.height + 20) confettiParticles.splice(i, 1); } requestAnimationFrame(updateConfetti); }
 
-  function advanceWave() {
-    currentWave++;
-    if (currentWave < WAVES_PER_MATCH) {
-      renderWave();
-    } else {
-      concludeMatch();
-    }
-  }
-
-  function concludeMatch() {
-    document.getElementById("playScreen").classList.remove("active");
-    document.getElementById("resultScreen").classList.add("active");
-
-    document.getElementById("certPlayerName").textContent = activePlayer;
-    document.getElementById("certSummary").textContent =
-      `Pontuação Final: ${points} pts | Acertos: ${correctHits} de ${WAVES_PER_MATCH} ondas (${isTimedMode ? "Modo Relógio" : "Modo Clássico"})`;
-
-    saveRankingEntry();
-  }
-
-  function saveRankingEntry() {
-    const list = JSON.parse(localStorage.getItem("rankingPegandoOndaV2") || "[]");
-    list.push({
-      name: activePlayer,
-      score: points,
-      hits: `${correctHits}/${WAVES_PER_MATCH}`,
-      mode: isTimedMode ? "Relógio ⏱️" : "Clássico 🌊",
-      date: new Date().toLocaleDateString("pt-BR")
-    });
-    list.sort((a, b) => b.score - a.score);
-    localStorage.setItem("rankingPegandoOndaV2", JSON.stringify(list.slice(0, 40)));
-    renderRankingTable();
-  }
-
-  function renderRankingTable() {
-    const list = JSON.parse(localStorage.getItem("rankingPegandoOndaV2") || "[]");
-    const tbody = document.getElementById("rankingBody");
-    if (list.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:18px;">Ainda não há registros. Comece a primeira onda! 🏄‍♂️</td></tr>`;
-      return;
-    }
-    tbody.innerHTML = list.map((entry, idx) => {
-      const medal = idx === 0 ? "🥇 1º" : idx === 1 ? "🥈 2º" : idx === 2 ? "🥉 3º" : `${idx + 1}º`;
-      return `<tr>
-        <td><strong>${medal}</strong></td>
-        <td>${entry.name}</td>
-        <td><strong>${entry.score} pts</strong></td>
-        <td>${entry.hits}</td>
-        <td>${entry.mode}</td>
-      </tr>`;
-    }).join("");
-  }
-
-  function exportCSV() {
-    const list = JSON.parse(localStorage.getItem("rankingPegandoOndaV2") || "[]");
-    if (!list.length) return alert("O placar ainda está vazio!");
-    let csv = "Posicao,Estudante,Pontos,Acertos,Modo,Data\n";
-    list.forEach((r, i) => {
-      csv += `${i + 1},"${r.name}",${r.score},"${r.hits}","${r.mode}","${r.date}"\n`;
-    });
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "placar_pegando_onda.csv";
-    link.click();
-  }
-
-  function resetBoard() {
-    if (confirm("Professor(a), deseja limpar todo o ranking para iniciar com uma nova turma?")) {
-      localStorage.removeItem("rankingPegandoOndaV2");
-      renderRankingTable();
-    }
-  }
-
-  function goHome() {
-    clearInterval(timerRef);
-    renderRankingTable();
-    document.getElementById("playScreen").classList.remove("active");
-    document.getElementById("resultScreen").classList.remove("active");
-    document.getElementById("homeScreen").classList.add("active");
-  }
-
-  renderRankingTable();
-</script>
+        window.onload = function () { initFirebase(); updateConfetti(); };
+    </script>
 </body>
 </html>
