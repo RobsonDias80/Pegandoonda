@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pegando Onda com Fato e Opinião</title>
+  <style>
+    :root {
+      --ocean-dark: #005f87;
+      --ocean-light: #00a8e8;
+      --sand: #f4d06f;
+      --fact-color: #0284c7;
+      --opinion-color: #db2777;
+      --success: #16a34a;
+      --error: #dc2626;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body {
+      background: linear-gradient(180deg, #87CEEB 0%, #e0f6ff 55%, var(--sand) 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      color: #1e293b;
+      overflow-x: hidden;
+    }
+    .container {
+      width: 100%;
+      max-width: 850px;
+      background: rgba(255, 255, 255, 0.94);
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0, 95, 135, 0.25);
+      padding: 24px;
+      margin-top: 10px;
+      position: relative;
+      border: 4px solid #fff;
+    }
+    h1 {
+      text-align: center;
+      color: var(--ocean-dark);
+      font-size: 1.9rem;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #475569;
+      margin-bottom: 18px;
+      font-size: 1rem;
+    }
+    /* Barra de Status Superior */
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f1f5f9;
+      padding: 10px 16px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      font-weight: bold;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .badge {
+      background: var(--ocean-dark);
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+    .combo-badge { background: #f59e0b; }
+    .timer-bar-container {
+      width: 100%;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 15px;
+      display: none;
+    }
+    .timer-bar {
+      height: 100%;
+      background: #ef4444;
+      width: 100%;
+      transition: width 1s linear;
+    }
+    /* Trilha da Onda e Surfista */
+    .wave-track {
+      position: relative;
+      height: 120px;
+      background: linear-gradient(180deg, #bae6fd 0%, #0284c7 75%, #0369a1 100%);
+      border-radius: 16px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      border: 3px solid #38bdf8;
+    }
+    .wave-svg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 200%;
+      height: 55px;
+      animation: waveMove 6s infinite linear;
+    }
+    @keyframes waveMove {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .surfer-avatar {
+      position: absolute;
+      bottom: 22px;
+      left: 4%;
+      font-size: 2.6rem;
+      transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.4s ease;
+      filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.3));
+      z-index: 5;
+    }
+    .surfer-jump { transform: translateY(-25px) rotate(-15deg) scale(1.15); }
+    .surfer-wobble { transform: rotate(25deg); }
+    .finish-flag {
+      position: absolute;
+      right: 12px;
+      bottom: 25px;
+      font-size: 2.2rem;
+    }
+    /* Guardiões Leo e Bia */
+    .guardians-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .guardian {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 115px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+    .guardian.react { transform: translateY(-10px) scale(1.08); }
+    .guardian-avatar {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      margin-bottom: 6px;
+      border: 3px solid white;
+    }
+    .leo-bg { background: linear-gradient(135deg, #0284c7, #38bdf8); }
+    .bia-bg { background: linear-gradient(135deg, #db2777, #f472b6); }
+    .guardian-name { font-weight: bold; font-size: 0.85rem; }
+    /* Cartão de Frase */
+    .question-card {
+      flex: 1;
+      background: #ffffff;
+      border: 3px dashed var(--ocean-light);
+      border-radius: 16px;
+      padding: 22px;
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #0f172a;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    /* Botões de Resposta */
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .btn {
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-fact {
+      background: var(--fact-color);
+      box-shadow: 0 6px 0 #0369a1;
+    }
+    .btn-opinion {
+      background: var(--opinion-color);
+      box-shadow: 0 6px 0 #9d174d;
+    }
+    .btn-secondary {
+      background: #64748b;
+      box-shadow: 0 4px 0 #475569;
+      font-size: 0.95rem;
+      padding: 10px 16px;
+    }
+    /* Feedback Didático */
+    .feedback-box {
+      padding: 14px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      font-weight: 500;
+      text-align: center;
+      display: none;
+    }
+    .feedback-box.correct { background: #dcfce7; color: #166534; border: 2px solid #22c55e; }
+    .feedback-box.wrong { background: #fee2e2; color: #991b1b; border: 2px solid #ef4444; }
+    /* Telas (Início, Jogo, Fim) */
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .input-group {
+      display: flex;
+      gap: 8px;
+      max-width: 420px;
+      margin: 0 auto 18px auto;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 12px 15px;
+      border: 2px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 1rem;
+    }
+    .mode-selector {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    /* Ranking da Turma */
+    .leaderboard {
+      margin-top: 24px;
+      background: #f8fafc;
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid #e2e8f0;
+    }
+    .leaderboard h3 {
+      text-align: center;
+      margin-bottom: 12px;
+      color: var(--ocean-dark);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    /* Certificado para Impressão */
+    .certificate {
+      border: 6px double var(--ocean-dark);
+      background: #fffbeb;
+      padding: 25px;
+      border-radius: 16px;
+      text-align: center;
+      margin: 20px 0;
+    }
+    .teacher-controls {
+      margin-top: 15px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    @media (max-width: 600px) {
+      .guardians-row { flex-direction: column; }
+      .guardian { flex-direction: row; width: 100%; justify-content: center; gap: 10px; }
+      .actions { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body * { visibility: hidden; }
+      #certificateArea, #certificateArea * { visibility: visible; }
+      #certificateArea { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🏄‍♂️ Pegando Onda: Fato ou Opinião?</h1>
+  <p class="subtitle">Domine a leitura crítica e ajude os surfistas a chegarem à crista da onda!</p>
+
+  <!-- TELA INICIAL -->
+  <div id="startScreen" class="screen active">
+    <div class="input-group">
+      <input type="text" id="playerName" placeholder="Digite seu nome ou apelido..." maxlength="22">
+      <button class="btn btn-secondary" onclick="generateRandomNickname()" title="Sortear Apelido">🎲</button>
+    </div>
+
+    <div class="mode-selector">
+      <button class="btn btn-fact" onclick="startGame(false)">🌊 Modo Clássico (Sem Tempo)</button>
+      <button class="btn btn-opinion" onclick="startGame(true)">⏱️ Desafio Contra o Relógio (15s)</button>
+    </div>
+
+    <div class="leaderboard">
+      <h3>🏆 Ranking da Turma</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Pos.</th>
+            <th>Surfista</th>
+            <th>Pontos</th>
+            <th>Acertos</th>
+            <th>Modo</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardBody"></tbody>
+      </table>
+      <div class="teacher-controls">
+        <button class="btn btn-secondary" onclick="exportRankingCSV()">📥 Exportar Ranking (CSV)</button>
+        <button class="btn btn-secondary" onclick="clearRanking()">🗑️ Limpar Placar (Professor)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELA DE JOGO -->
+  <div id="gameScreen" class="screen">
+    <div class="hud">
+      <span id="hudPlayer">🏄 Surfista</span>
+      <span class="badge" id="hudProgress">Onda: 1 / 12</span>
+      <span class="badge combo-badge" id="hudCombo">🔥 Combo: 0x</span>
+      <span class="badge" id="hudScore">⭐ 0 pts</span>
+    </div>
+
+    <div class="timer-bar-container" id="timerContainer">
+      <div class="timer-bar" id="timerBar"></div>
+    </div>
+
+    <div class="wave-track">
+      <div class="surfer-avatar" id="surfer">🏄‍♂️</div>
+      <div class="finish-flag">🏁</div>
+      <svg class="wave-svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,60 C300,120 300,0 600,60 C900,120 900,0 1200,60 L1200,120 L0,120 Z" fill="rgba(255,255,255,0.35)"></path>
+      </svg>
+    </div>
+
+    <div class="guardians-row">
+      <div class="guardian" id="leoGuardian">
+        <div class="guardian-avatar leo-bg">👦🏽</div>
+        <div class="guardian-name">Leo (Fato)</div>
+      </div>
+
+      <div class="question-card" id="questionText">
+        Carregando onda...
+      </div>
+
+      <div class="guardian" id="biaGuardian">
+        <div class="guardian-avatar bia-bg">👧🏽</div>
+        <div class="guardian-name">Bia (Opinião)</div>
+      </div>
+    </div>
+
+    <div id="feedbackBox" class="feedback-box"></div>
+
+    <div class="actions" id="answerButtons">
+      <button class="btn btn-fact" onclick="checkAnswer('FATO')">📘 É UM FATO</button>
+      <button class="btn btn-opinion" onclick="checkAnswer('OPINIAO')">💭 É UMA OPINIÃO</button>
+    </div>
+
+    <button id="nextBtn" class="btn btn-secondary" style="width:100%; display:none;" onclick="nextQuestion()">Próxima Onda ➡️</button>
+  </div>
+
+  <!-- TELA FINAL E CERTIFICADO -->
+  <div id="endScreen" class="screen">
+    <div id="certificateArea" class="certificate">
+      <h2>🏅 CERTIFICADO MESTRE DAS ONDAS 🏅</h2>
+      <p style="margin: 12px 0;">Certificamos que o(a) surfista</p>
+      <h1 id="certName" style="color: var(--fact-color); margin: 8px 0;">Nome do Estudante</h1>
+      <p id="certStats" style="font-size: 1.1rem; margin: 12px 0;"></p>
+      <p style="font-size: 0.9rem; color: #64748b;">Concluiu com sucesso a missão de leitura crítica diferenciando Fatos e Opiniões!</p>
+    </div>
+
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+      <button class="btn btn-fact" onclick="window.print()">🖨️ Imprimir / Salvar Certificado</button>
+      <button class="btn btn-opinion" onclick="returnToMenu()">🔄 Jogar Novamente / Ver Ranking</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Banco completo das 24 frases do material "Pegando Onda com Fato e Opinião"
+  const ALL_QUESTIONS = [
+    // 12 FATOS
+    { text: "O surf é um esporte praticado no mar com o uso de uma prancha.", type: "FATO", exp: "É uma definição objetiva e comprovável sobre o esporte." },
+    { text: "As ondas são formadas principalmente pela ação dos ventos sobre a superfície do mar.", type: "FATO", exp: "Fenômeno físico e natural comprovado pela ciência." },
+    { text: "O protetor solar ajuda a proteger a pele contra os raios solares.", type: "FATO", exp: "Informação científica e médica verificável." },
+    { text: "Muitas praias possuem sinalização para orientar os banhistas sobre áreas perigosas.", type: "FATO", exp: "Dado real que pode ser observado nas praias." },
+    { text: "A maré pode subir ou descer ao longo do dia.", type: "FATO", exp: "Fenômeno natural e verificável em qualquer litoral." },
+    { text: "O litoral do Ceará possui várias praias visitadas por turistas.", type: "FATO", exp: "Informação geográfica e turística que pode ser comprovada." },
+    { text: "Alguns surfistas usam roupas próprias para proteger o corpo durante a prática do esporte.", type: "FATO", exp: "Constatável na realidade sobre os equipamentos dos surfistas." },
+    { text: "O salva-vidas atua na prevenção de acidentes em áreas de banho.", type: "FATO", exp: "Descreve a função real e objetiva desse profissional." },
+    { text: "A areia da praia pode ficar muito quente em dias de sol forte.", type: "FATO", exp: "Fato físico: o sol aquece a superfície da areia." },
+    { text: "O lixo deixado na praia pode prejudicar os animais marinhos.", type: "FATO", exp: "Fato comprovado pela biologia e estudos ambientais." },
+    { text: "O surf exige equilíbrio, força e atenção às ondas.", type: "FATO", exp: "Exigências físicas reais para se manter em pé na prancha." },
+    { text: "Em algumas praias, há campeonatos de surf durante o ano.", type: "FATO", exp: "Acontecimento real registrado em calendários esportivos." },
+    // 12 OPINIÕES
+    { text: "Surfar é uma das atividades mais divertidas que existem.", type: "OPINIAO", exp: "O que é divertido varia de pessoa para pessoa." },
+    { text: "A praia fica mais bonita no fim da tarde.", type: "OPINIAO", exp: "Beleza é um julgamento pessoal; outros preferem a manhã." },
+    { text: "O som das ondas é muito relaxante.", type: "OPINIAO", exp: "Expressa uma sensação pessoal e subjetiva." },
+    { text: "Aprender a surfar parece mais difícil do que nadar.", type: "OPINIAO", exp: "Julgamento de percepção ('parece mais difícil')." },
+    { text: "O melhor lugar para passar as férias é perto do mar.", type: "OPINIAO", exp: "Preferência pessoal; há quem prefira a serra ou o campo." },
+    { text: "Caminhar na areia é uma sensação maravilhosa.", type: "OPINIAO", exp: "Adjetivo emocional ('maravilhosa') que reflete gosto individual." },
+    { text: "As praias do Ceará estão entre as mais bonitas do Brasil.", type: "OPINIAO", exp: "Mesmo sendo lindas, 'mais bonitas' é uma avaliação de valor." },
+    { text: "O surf é mais emocionante do que outros esportes aquáticos.", type: "OPINIAO", exp: "Comparação baseada na emoção particular de cada praticante." },
+    { text: "Ver o pôr do sol na praia é uma experiência inesquecível.", type: "OPINIAO", exp: "Impressão subjetiva e sentimental sobre o momento." },
+    { text: "Uma praia limpa deixa o passeio muito mais agradável.", type: "OPINIAO", exp: "Expressa um sentimento de agrado ('mais agradável')." },
+    { text: "Pranchas coloridas deixam o surf mais bonito.", type: "OPINIAO", exp: "Gosto estético pessoal sobre cores e beleza." },
+    { text: "Tomar banho de mar é a melhor forma de aliviar o calor.", type: "OPINIAO", exp: "Opinião; outras pessoas podem preferir piscina ou ventilador." }
+  ];
+
+  let currentQuestions = [];
+  let currentIndex = 0;
+  let score = 0;
+  let hits = 0;
+  let combo = 0;
+  let timedMode = false;
+  let timerInterval = null;
+  let timeLeft = 15;
+  let currentPlayer = "Surfista";
+
+  // Efeitos sonoros leves com Web Audio API
+  function playTone(freq, duration) {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.frequency.value = freq;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+      osc.stop(ctx.currentTime + duration);
+    } catch (e) {}
+  }
+
+  function generateRandomNickname() {
+    const prefixes = ["Falcão", "Tubarão", "Sereia", "Mestre", "Raio", "Guardião", "Onda", "Capitão"];
+    const suffixes = ["do Ceará", "das Ondas", "Radical", "do Mar", "Solar", "do Surf", "Veloz"];
+    const name = prefixes[Math.floor(Math.random() * prefixes.length)] + " " +
+                 suffixes[Math.floor(Math.random() * suffixes.length)];
+    document.getElementById("playerName").value = name;
+  }
+
+  function startGame(isTimed) {
+    const inputName = document.getElementById("playerName").value.trim();
+    currentPlayer = inputName || "Surfista Anônimo";
+    timedMode = isTimed;
+    score = 0;
+    hits = 0;
+    combo = 0;
+    currentIndex = 0;
+
+    // Embaralha todas as 24 frases para a partida
+    currentQuestions = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5);
+
+    document.getElementById("startScreen").classList.remove("active");
+    document.getElementById("endScreen").classList.remove("active");
+    document.getElementById("gameScreen").classList.add("active");
+    document.getElementById("hudPlayer").textContent = "🏄 " + currentPlayer;
+    document.getElementById("timerContainer").style.display = timedMode ? "block" : "none";
+
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    const q = currentQuestions[currentIndex];
+    document.getElementById("questionText").textContent = `"${q.text}"`;
+    document.getElementById("hudProgress").textContent = `Onda: ${currentIndex + 1} / ${currentQuestions.length}`;
+    document.getElementById("hudCombo").textContent = `🔥 Combo: ${combo}x`;
+    document.getElementById("hudScore").textContent = `⭐ ${score} pts`;
+
+    document.getElementById("feedbackBox").style.display = "none";
+    document.getElementById("nextBtn").style.display = "none";
+    document.getElementById("answerButtons").style.pointerEvents = "auto";
+    document.getElementById("leoGuardian").classList.remove("react");
+    document.getElementById("biaGuardian").classList.remove("react");
+
+    // Atualiza posição na onda
+    const progressPercent = 4 + (currentIndex / currentQuestions.length) * 82;
+    const surfer = document.getElementById("surfer");
+    surfer.style.left = progressPercent + "%";
+    surfer.className = "surfer-avatar";
+
+    if (timedMode) startTimer();
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timeLeft = 15;
+    const bar = document.getElementById("timerBar");
+    bar.style.width = "100%";
+
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      bar.style.width = ((timeLeft / 15) * 100) + "%";
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        checkAnswer("TIMEOUT");
+      }
+    }, 1000);
+  }
+
+  function checkAnswer(choice) {
+    clearInterval(timerInterval);
+    document.getElementById("answerButtons").style.pointerEvents = "none";
+
+    const q = currentQuestions[currentIndex];
+    const fb = document.getElementById("feedbackBox");
+    const surfer = document.getElementById("surfer");
+
+    if (choice === q.type) {
+      hits++;
+      combo++;
+      const timeBonus = timedMode ? timeLeft * 2 : 0;
+      score += 100 + (combo * 15) + timeBonus;
+      playTone(660, 0.25);
+
+      surfer.classList.add("surfer-jump");
+      if (q.type === "FATO") {
+        document.getElementById("leoGuardian").classList.add("react");
+      } else {
+        document.getElementById("biaGuardian").classList.add("react");
+      }
+
+      fb.className = "feedback-box correct";
+      fb.innerHTML = `✅ <strong>Mandou bem na manobra!</strong> ${q.exp}`;
+    } else {
+      combo = 0;
+      playTone(220, 0.35);
+      surfer.classList.add("surfer-wobble");
+
+      fb.className = "feedback-box wrong";
+      const reason = choice === "TIMEOUT" ? "⏰ O tempo acabou!" : "❌ Quase caiu da prancha!";
+      fb.innerHTML = `${reason} A resposta correta é <strong>${q.type}</strong>. ${q.exp}`;
+    }
+
+    document.getElementById("hudCombo").textContent = `🔥 Combo: ${combo}x`;
+    document.getElementById("hudScore").textContent = `⭐ ${score} pts`;
+    fb.style.display = "block";
+    document.getElementById("nextBtn").style.display = "block";
+  }
+
+  function nextQuestion() {
+    currentIndex++;
+    if (currentIndex < currentQuestions.length) {
+      loadQuestion();
+    } else {
+      finishGame();
+    }
+  }
+
+  function finishGame() {
+    document.getElementById("gameScreen").classList.remove("active");
+    document.getElementById("endScreen").classList.add("active");
+
+    document.getElementById("certName").textContent = currentPlayer;
+    document.getElementById("certStats").textContent =
+      `Pontuação: ${score} pontos | Acertos: ${hits} de ${currentQuestions.length} ondas (${timedMode ? "Modo Relógio" : "Modo Clássico"})`;
+
+    saveScore();
+  }
+
+  function saveScore() {
+    const records = JSON.parse(localStorage.getItem("pegandoOndaRanking") || "[]");
+    records.push({
+      name: currentPlayer,
+      score: score,
+      hits: `${hits}/${currentQuestions.length}`,
+      mode: timedMode ? "Relógio ⏱️" : "Clássico 🌊",
+      date: new Date().toLocaleDateString("pt-BR")
+    });
+    records.sort((a, b) => b.score - a.score);
+    localStorage.setItem("pegandoOndaRanking", JSON.stringify(records.slice(0, 30)));
+    renderLeaderboard();
+  }
+
+  function renderLeaderboard() {
+    const records = JSON.parse(localStorage.getItem("pegandoOndaRanking") || "[]");
+    const tbody = document.getElementById("leaderboardBody");
+    if (records.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Nenhum surfista no placar ainda. Seja o primeiro!</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = records.map((r, i) => {
+      const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}º`;
+      return `<tr>
+        <td><strong>${medal}</strong></td>
+        <td>${r.name}</td>
+        <td><strong>${r.score}</strong></td>
+        <td>${r.hits}</td>
+        <td>${r.mode}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  function exportRankingCSV() {
+    const records = JSON.parse(localStorage.getItem("pegandoOndaRanking") || "[]");
+    if (!records.length) return alert("O placar ainda está vazio!");
+    let csv = "Posicao,Nome,Pontos,Acertos,Modo,Data\n";
+    records.forEach((r, i) => {
+      csv += `${i + 1},"${r.name}",${r.score},"${r.hits}","${r.mode}","${r.date}"\n`;
+    });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "ranking_pegando_onda.csv";
+    a.click();
+  }
+
+  function clearRanking() {
+    if (confirm("Professor(a), deseja zerar o placar atual para iniciar com uma nova turma?")) {
+      localStorage.removeItem("pegandoOndaRanking");
+      renderLeaderboard();
+    }
+  }
+
+  function returnToMenu() {
+    renderLeaderboard();
+    document.getElementById("endScreen").classList.remove("active");
+    document.getElementById("startScreen").classList.add("active");
+  }
+
+  renderLeaderboard();
+</script>
+</body>
+</html>
