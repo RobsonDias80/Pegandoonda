@@ -20,7 +20,7 @@
 
         function saveLocalLeaderboard() {
             try {
-                localStorage.setItem(LEADERBOARD_STORAGE_KEY, JSON.stringify(leaderboardData.slice(0, 50))); 
+                localStorage.setItem(LEADERBOARD_STORAGE_KEY, JSON.stringify(leaderboardData.slice(0, 50)));
             } catch (error) {
                 console.warn('Não foi possível salvar o ranking localmente:', error);
             }
@@ -33,13 +33,22 @@
                     const app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app);
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
                     else await signInAnonymously(auth);
-                    onAuthStateChanged(auth, (user) => { currentUser = user; if (user) subscribeToLeaderboard(); });
+                    onAuthStateChanged(auth, (user) => {
+                        currentUser = user;
+                        if (user) subscribeToLeaderboard();
+                        else {
+                            loadLocalLeaderboard();
+                            renderLeaderboardUI();
+                        }
+                    });
                 } else {
                     loadLocalLeaderboard();
                     renderLeaderboardUI();
                 }
             } catch (err) {
-                console.warn('Modo offline do Placar ativado:', err); loadLocalLeaderboard(); renderLeaderboardUI();
+                console.warn('Modo offline do Placar ativado:', err);
+                loadLocalLeaderboard();
+                renderLeaderboardUI();
             }
         }
 
@@ -50,7 +59,9 @@
                 const items = [];
                 snapshot.forEach((docSnap) => items.push({ id: docSnap.id, ...docSnap.data() }));
                 items.sort((a, b) => ((b.score || 0) !== (a.score || 0) ? (b.score || 0) - (a.score || 0) : (b.maxCombo || 0) - (a.maxCombo || 0)));
-                leaderboardData = items; renderLeaderboardUI();
+                leaderboardData = items;
+                saveLocalLeaderboard();
+                renderLeaderboardUI();
             }, (error) => console.error('Erro ao sincronizar ranking:', error));
         }
 
@@ -59,8 +70,16 @@
             if (currentUser && db) {
                 try {
                     const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
-                    const docRef = await addDoc(scoresRef, entry); lastSavedDocId = docRef.id;
-                } catch (err) { console.error('Erro ao salvar no Firestore:', err); }
+                    const docRef = await addDoc(scoresRef, entry);
+                    lastSavedDocId = docRef.id;
+                    leaderboardData = [...leaderboardData, { id: docRef.id, ...entry }];
+                    leaderboardData.sort((a, b) => (b.score || 0) - (a.score || 0));
+                    leaderboardData = leaderboardData.slice(0, 50);
+                    saveLocalLeaderboard();
+                    renderLeaderboardUI();
+                } catch (err) {
+                    console.error('Erro ao salvar no Firestore:', err);
+                }
             } else {
                 entry.id = 'local-' + Date.now();
                 lastSavedDocId = entry.id;
@@ -88,7 +107,7 @@
                 else if (rank === 2) { medal = '<span class="text-2xl w-7 text-center">🥈</span>'; rowStyle = 'bg-gradient-to-r from-slate-50 to-slate-100 border-slate-300'; }
                 else if (rank === 3) { medal = '<span class="text-2xl w-7 text-center">🥉</span>'; rowStyle = 'bg-gradient-to-r from-orange-50 to-amber-50 border-orange-300'; }
                 const playerName = escapeHtml(item.playerName || 'Surfista sem nome');
-                const isCurrentPlayer = (item.id && item.id === lastSavedDocId) || (item.userId === 'local-player' && lastSavedDocId && item.id === lastSavedDocId);
+                const isCurrentPlayer = (item.id && item.id === lastSavedDocId) || (item.id && item.id === lastSavedDocId);
                 if (isCurrentPlayer) rowStyle = 'bg-gradient-to-r from-sky-100 to-cyan-100 border-sky-500 ring-2 ring-sky-400';
                 return `<div class="flex items-center justify-between p-3 rounded-2xl border-2 ${rowStyle} shadow-sm transition"><div class="flex items-center gap-3 min-w-0">${medal}<div class="min-w-0"><p class="font-display font-bold text-sky-900 truncate max-w-[150px] sm:max-w-[220px]">${playerName}</p><p class="text-[11px] text-slate-500">${item.correctCount ?? 0}/${item.totalWaves ?? 0} acertos · combo ${item.maxCombo ?? 1}x</p></div></div><div class="text-right"><p class="font-display font-bold text-lg text-sky-700">${Number(item.score || 0)}</p><p class="text-[11px] text-slate-500">pts</p></div></div>`;
             }).join('');
