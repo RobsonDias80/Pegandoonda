@@ -33,13 +33,13 @@
 
         @keyframes floatCloud { 0% { transform: translateX(-10%); } 50% { transform: translateX(10%); } 100% { transform: translateX(-10%); } }
         @keyframes waveMove { 0% { transform: translateX(0) translateZ(0) scaleY(1); } 50% { transform: translateX(-25%) translateZ(0) scaleY(0.92); } 100% { transform: translateX(-50%) translateZ(0) scaleY(1); } }
-        @keyframes sunPulse { 0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 20px rgba(253, 224, 71, 0.8)); } 50% { transform: scale(1.08) rotate(15deg); filter: drop-shadow(0 0 35px rgba(250, 204, 21, 1)); } }
+        @keyframes sunPulse { 0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 20px rgba(253, 224, 71, 0.8)); } 50% { transform: scale(1.08) rotate(15deg); filter: drop-shadow(0 0 28px rgba(253, 224, 71, 0.95)); } }
         @keyframes surferIdle { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-6px) rotate(1deg); } }
-        @keyframes surferCelebrate { 0%, 100% { transform: translateY(0) scale(1) rotate(0deg); } 25% { transform: translateY(-22px) scale(1.08) rotate(-6deg); } 50% { transform: translateY(-5px) scale(1.05) rotate(6deg); } 75% { transform: translateY(-18px) scale(1.08) rotate(-4deg); } }
-        @keyframes surferDoubt { 0%, 100% { transform: translateX(0) rotate(0deg); } 20% { transform: translateX(-8px) rotate(-5deg); } 40% { transform: translateX(8px) rotate(5deg); } 60% { transform: translateX(-6px) rotate(-3deg); } 80% { transform: translateX(6px) rotate(3deg); } }
+        @keyframes surferCelebrate { 0%, 100% { transform: translateY(0) scale(1) rotate(0deg); } 25% { transform: translateY(-22px) scale(1.08) rotate(-6deg); } 50% { transform: translateY(-5px) scale(1.02) rotate(2deg); } }
+        @keyframes surferDoubt { 0%, 100% { transform: translateX(0) rotate(0deg); } 20% { transform: translateX(-8px) rotate(-5deg); } 40% { transform: translateX(8px) rotate(5deg); } 60% { transform: translateX(-5px) rotate(-3deg); } }
         @keyframes boardRide { 0%, 100% { transform: translateY(0px) rotate(-4deg); } 50% { transform: translateY(-5px) rotate(3deg); } }
-        @keyframes boardRadicalManeuver { 0% { transform: translateY(0) rotate(0deg) scale(1); } 30% { transform: translateY(-28px) rotate(-360deg) scale(1.25); } 60% { transform: translateY(-10px) rotate(-375deg) scale(1.1); } 100% { transform: translateY(0) rotate(-360deg) scale(1); } }
-        @keyframes boardWobble { 0%, 100% { transform: translateY(0) rotate(0deg); } 20% { transform: translateY(6px) rotate(22deg); } 40% { transform: translateY(-4px) rotate(-22deg); } 60% { transform: translateY(4px) rotate(15deg); } 80% { transform: translateY(-2px) rotate(-10deg); } }
+        @keyframes boardRadicalManeuver { 0% { transform: translateY(0) rotate(0deg) scale(1); } 30% { transform: translateY(-28px) rotate(-360deg) scale(1.25); } 60% { transform: translateY(-10px) rotate(-180deg) scale(1.12); } 100% { transform: translateY(0) rotate(0deg) scale(1); } }
+        @keyframes boardWobble { 0%, 100% { transform: translateY(0) rotate(0deg); } 20% { transform: translateY(6px) rotate(22deg); } 40% { transform: translateY(-4px) rotate(-22deg); } 60% { transform: translateY(4px) rotate(12deg); } }
 
         .animate-cloud-slow { animation: floatCloud 18s ease-in-out infinite; }
         .animate-cloud-fast { animation: floatCloud 12s ease-in-out infinite reverse; }
@@ -249,7 +249,7 @@
                     🏷️ Qual é o seu Nome ou Apelido de Surfista? <span class="text-xs font-normal text-slate-500">(Opcional)</span>
                 </label>
                 <div class="flex gap-2">
-                    <input type="text" id="playerNameInput" maxlength="22" placeholder="Ex: João, Ana Radical, Rei da Onda..." class="w-full px-4 py-2.5 rounded-xl border-2 border-sky-300 focus:outline-none focus:ring-4 focus:ring-sky-200" />
+                    <input type="text" id="playerNameInput" maxlength="22" placeholder="Ex: João, Ana Radical, Rei da Onda..." class="w-full px-4 py-2.5 rounded-xl border-2 border-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-400 bg-white/80" />
                     <button type="button" onclick="window.generateRandomNick()" class="bg-sky-200 hover:bg-sky-300 text-sky-900 font-bold px-3.5 py-2 rounded-xl border border-sky-400 transition">🎲</button>
                 </div>
                 <p class="text-xs text-slate-500 mt-1">Se deixar em branco, criaremos um apelido radical para você aparecer no Ranking!</p>
@@ -279,7 +279,7 @@
                     <span id="hudPlayerName" class="font-bold text-sky-950 text-xs sm:text-sm truncate hidden md:inline">Surfista</span>
                 </div>
                 <div class="text-center">
-                    <div id="comboBadge" class="inline-flex items-center gap-1 bg-amber-100 text-amber-800 border-2 border-amber-400 px-3 py-0.5 rounded-full font-display font-bold text-xs sm:text-sm transition-all">
+                    <div id="comboBadge" class="inline-flex items-center gap-1 bg-amber-100 text-amber-800 border-2 border-amber-400 px-3 py-0.5 rounded-full font-display font-bold text-xs sm:text-sm">
                         <span>🔥 Combo:</span><span id="comboText">x1</span>
                     </div>
                 </div>
@@ -301,7 +301,7 @@
                     <span class="text-xl sm:text-2xl drop-shadow">🏁</span>
                     <span class="text-[10px] font-extrabold text-white bg-sky-900/70 px-1.5 rounded">CRISTA</span>
                 </div>
-                <div id="maneuverToast" class="opacity-0 transition-all duration-300 absolute left-1/2 -translate-x-1/2 top-1.5 z-30 bg-amber-400 text-amber-950 font-display font-bold text-xs sm:text-sm px-3 py-1 rounded-full shadow-lg"> </div>
+                <div id="maneuverToast" class="opacity-0 transition-all duration-300 absolute left-1/2 -translate-x-1/2 top-1.5 z-30 bg-amber-400 text-amber-950 font-display font-bold text-xs sm:text-sm px-3 py-1 rounded-full shadow-lg"></div>
                 <div id="surferTrackNode" class="absolute z-20 transition-all duration-700 ease-out" style="left: 4%; bottom: 10px;">
                     <div id="surferBoardSprite" class="board-idle relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
                         <div id="boardSplash" class="hidden absolute -bottom-1 -left-2 w-16 h-8 pointer-events-none">
@@ -440,11 +440,11 @@
             <h2 id="endTitle" class="font-display text-3xl sm:text-4xl font-bold text-sky-900 mb-1">Fim da Bateria de Surf!</h2>
             <p id="endSubtitle" class="text-slate-600 font-semibold text-sm sm:text-base mb-5">Confira o seu desempenho nas ondas do conhecimento:</p>
             <div class="grid grid-cols-3 gap-2.5 sm:gap-4 max-w-xl mx-auto mb-6">
-                <div class="bg-sky-50 p-3 rounded-2xl border-2 border-sky-300"><span class="text-xs font-bold text-sky-700 uppercase block">Pontuação</span><span id="finalScore" class="font-display font-bold text-2xl text-sky-900">0</span></div>
-                <div class="bg-emerald-50 p-3 rounded-2xl border-2 border-emerald-300"><span class="text-xs font-bold text-emerald-700 uppercase block">Acertos</span><span id="finalAccuracy" class="font-display font-bold text-2xl text-emerald-900">0/0</span></div>
-                <div class="bg-amber-50 p-3 rounded-2xl border-2 border-amber-300"><span class="text-xs font-bold text-amber-700 uppercase block">Maior Combo</span><span id="finalMaxCombo" class="font-display font-bold text-2xl text-amber-900">x1</span></div>
+                <div class="bg-sky-50 p-3 rounded-2xl border-2 border-sky-300"><span class="text-xs font-bold text-sky-700 uppercase block">Pontuação</span><span id="finalScore" class="font-display font-black text-xl sm:text-2xl text-sky-900">0</span></div>
+                <div class="bg-emerald-50 p-3 rounded-2xl border-2 border-emerald-300"><span class="text-xs font-bold text-emerald-700 uppercase block">Acertos</span><span id="finalAccuracy" class="font-display font-black text-xl sm:text-2xl text-emerald-900">0/0</span></div>
+                <div class="bg-amber-50 p-3 rounded-2xl border-2 border-amber-300"><span class="text-xs font-bold text-amber-700 uppercase block">Maior Combo</span><span id="finalMaxCombo" class="font-display font-black text-xl sm:text-2xl text-amber-900">x1</span></div>
             </div>
-            <div id="saveScoreStatus" class="text-xs sm:text-sm font-bold text-emerald-700 bg-emerald-100 border border-emerald-300 px-4 py-2 rounded-xl max-w-md mx-auto mb-5 flex items-center justify-center gap-2 hidden">✅ Resultado salvo no ranking.</div>
+            <div id="saveScoreStatus" class="hidden text-xs sm:text-sm font-bold text-emerald-700 bg-emerald-100 border border-emerald-300 px-4 py-2 rounded-xl max-w-md mx-auto mb-5 items-center justify-center">✅ Resultado salvo no ranking.</div>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <button onclick="window.openLeaderboardModal()" class="btn-3d-yellow text-amber-950 font-display font-bold py-3.5 px-6 rounded-2xl text-lg flex items-center gap-2 w-full sm:w-auto justify-center">🏆 Ver Ranking</button>
                 <button onclick="window.restartSameMode()" class="btn-3d-blue text-white font-display font-bold py-3.5 px-6 rounded-2xl text-lg flex items-center gap-2 w-full sm:w-auto justify-center">🔄 Jogar Novamente</button>
@@ -475,10 +475,41 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let leaderboardData = [];
+        let lastSavedDocId = null;
+        let firebaseSdk = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pegando-onda-fato-opiniao';
+        const LEADERBOARD_STORAGE_KEY = 'pegando-onda-fato-opiniao-ranking';
+
+        async function loadFirebaseModules() {
+            if (firebaseSdk) return firebaseSdk;
+            try {
+                const [appMod, authMod, firestoreMod] = await Promise.all([
+                    import('https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js'),
+                    import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js'),
+                    import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js')
+                ]);
+                firebaseSdk = {
+                    initializeApp: appMod.initializeApp,
+                    getAuth: authMod.getAuth,
+                    signInAnonymously: authMod.signInAnonymously,
+                    signInWithCustomToken: authMod.signInWithCustomToken,
+                    onAuthStateChanged: authMod.onAuthStateChanged,
+                    getFirestore: firestoreMod.getFirestore,
+                    collection: firestoreMod.collection,
+                    addDoc: firestoreMod.addDoc,
+                    onSnapshot: firestoreMod.onSnapshot
+                };
+                return firebaseSdk;
+            } catch (error) {
+                console.warn('Firebase indisponível. O jogo continuará em modo local.', error);
+                return null;
+            }
+        }
 
         const QUESTIONS_BANK = [
             { text: "O surf é um esporte praticado no mar com o uso de uma prancha.", type: "FATO", explanation: "Isso é um dado real e comprovável sobre como o esporte funciona." },
@@ -487,13 +518,13 @@
             { text: "Muitas praias possuem sinalização para orientar os banhistas sobre áreas perigosas.", type: "FATO", explanation: "Qualquer pessoa pode ir à praia e verificar a existência de sinalização." },
             { text: "A maré pode subir ou descer ao longo do dia.", type: "FATO", explanation: "É um fenômeno natural observável e medido todos os dias." },
             { text: "O litoral do Ceará possui várias praias visitadas por turistas.", type: "FATO", explanation: "É um dado geográfico e turístico que pode ser comprovado com mapas e registros." },
-            { text: "Alguns surfistas usam roupas próprias para proteger o corpo durante a prática do esporte.", type: "FATO", explanation: "Podemos observar e comprovar o uso dessas roupas em atividades aquáticas." },
+            { text: "Alguns surfistas usam roupas próprias para proteger o corpo durante a prática do esporte.", type: "FATO", explanation: "Podemos observar e comprovar o uso dessas roupas em registros, fotos e praias." },
             { text: "O salva-vidas atua na prevenção de acidentes em áreas de banho.", type: "FATO", explanation: "Descreve a função real e verificável desse profissional." },
             { text: "A areia da praia pode ficar muito quente em dias de sol forte.", type: "FATO", explanation: "A temperatura da areia pode ser medida e comprovada fisicamente." },
             { text: "O lixo deixado na praia pode prejudicar os animais marinhos.", type: "FATO", explanation: "É um fato comprovado por biólogos e estudos ambientais." },
             { text: "O surf exige equilíbrio, força e atenção às ondas.", type: "FATO", explanation: "São habilidades físicas reais necessárias para ficar em pé na prancha." },
             { text: "Em algumas praias, há campeonatos de surf durante o ano.", type: "FATO", explanation: "Eventos e campeonatos têm datas, locais e registros oficiais que comprovam sua realização." },
-            { text: "Surfar é uma das atividades mais divertidas que existem.", type: "OPINIAO", explanation: "Mais divertida" é um gosto pessoal; outra pessoa pode achar futebol ou leitura mais divertida." },
+            { text: "Surfar é uma das atividades mais divertidas que existem.", type: "OPINIAO", explanation: "Mais divertida" é um gosto pessoal; outra pessoa pode achar futebol ou leitura mais divertidas." },
             { text: "A praia fica mais bonita no fim da tarde.", type: "OPINIAO", explanation: "A beleza depende do olhar de cada um." },
             { text: "O som das ondas é muito relaxante.", type: "OPINIAO", explanation: "Expressa uma sensação pessoal; nem todo mundo sente a mesma coisa." },
             { text: "Aprender a surfar parece mais difícil do que nadar.", type: "OPINIAO", explanation: "A palavra \"parece\" e a ideia de dificuldade variam de acordo com a experiência de cada pessoa." },
@@ -508,7 +539,6 @@
         ];
 
         const FUN_NICKNAMES = ["Surfista Radical", "Rei da Maré", "Rainha das Ondas", "Tubarão do Surf", "Mestre da Prancha", "Onda Dourada", "Golfinho Veloz", "Brisa do Ceará", "Furacão do Mar", "Vento Forte", "Pirata da Prancha", "Estrela da Praia", "Mão do Mar", "Trem da Onda", "Pé de Tubarão", "Raios do Azul", "Duna Veloz", "Tiro de Crista"];
-
         let soundEnabled = true;
         let audioCtx = null;
 
@@ -569,10 +599,6 @@
             else { icon.className = 'fa-solid fa-volume-xmark text-slate-400'; }
         };
 
-        let db = null; let auth = null; let currentUser = null; let leaderboardData = []; let lastSavedDocId = null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pegando-onda-fato-opiniao';
-        const LEADERBOARD_STORAGE_KEY = 'pegando-onda-fato-opiniao-ranking';
-
         function loadLocalLeaderboard() {
             try {
                 const saved = localStorage.getItem(LEADERBOARD_STORAGE_KEY);
@@ -599,12 +625,26 @@
 
         async function initFirebase() {
             try {
+                const firebase = await loadFirebaseModules();
+                if (!firebase) {
+                    loadLocalLeaderboard();
+                    renderLeaderboardUI();
+                    return;
+                }
+
                 if (typeof __firebase_config !== 'undefined' && __firebase_config) {
                     const firebaseConfig = JSON.parse(__firebase_config);
-                    const app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app);
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
-                    else await signInAnonymously(auth);
-                    onAuthStateChanged(auth, (user) => {
+                    const app = firebase.initializeApp(firebaseConfig);
+                    auth = firebase.getAuth(app);
+                    db = firebase.getFirestore(app);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await firebase.signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await firebase.signInAnonymously(auth);
+                    }
+
+                    firebase.onAuthStateChanged(auth, (user) => {
                         currentUser = user;
                         if (user) subscribeToLeaderboard();
                         else {
@@ -624,9 +664,9 @@
         }
 
         function subscribeToLeaderboard() {
-            if (!currentUser || !db) return;
-            const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
-            onSnapshot(scoresRef, (snapshot) => {
+            if (!currentUser || !db || !firebaseSdk) return;
+            const scoresRef = firebaseSdk.collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+            firebaseSdk.onSnapshot(scoresRef, (snapshot) => {
                 const items = [];
                 snapshot.forEach((docSnap) => items.push({ id: docSnap.id, ...docSnap.data() }));
                 items.sort((a, b) => ((b.score || 0) !== (a.score || 0) ? (b.score || 0) - (a.score || 0) : (b.maxCombo || 0) - (a.maxCombo || 0)));
@@ -647,10 +687,10 @@
                 timestamp: Date.now()
             };
 
-            if (currentUser && db) {
+            if (currentUser && db && firebaseSdk) {
                 try {
-                    const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
-                    const docRef = await addDoc(scoresRef, entry);
+                    const scoresRef = firebaseSdk.collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+                    const docRef = await firebaseSdk.addDoc(scoresRef, entry);
                     lastSavedDocId = docRef.id;
                     leaderboardData = [...leaderboardData, { id: docRef.id, ...entry }];
                     leaderboardData.sort((a, b) => (b.score || 0) - (a.score || 0));
