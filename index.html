@@ -184,6 +184,13 @@
         </div>
     </header>
 
+    <div id="offlineStatus" class="hidden relative z-20 w-full max-w-5xl mx-auto px-3 sm:px-6 mt-2">
+        <div class="bg-amber-100 text-amber-900 border border-amber-300 rounded-2xl px-4 py-2 text-center text-xs sm:text-sm font-bold shadow-sm">
+            <i class="fa-solid fa-wifi mr-1"></i>
+            <span id="offlineStatusText">Modo local ativado: o Firebase não está disponível, mas o jogo continua funcionando.</span>
+        </div>
+    </div>
+
     <main class="relative z-10 flex-grow flex items-center justify-center w-full max-w-5xl mx-auto px-3 sm:px-6 py-2 pb-16">
         <section id="startScreen" class="w-full max-w-3xl glass-panel rounded-[28px] p-5 sm:p-8 shadow-2xl border-4 border-sky-400 text-center my-auto transition-all">
             <div class="inline-block bg-sky-100 text-sky-800 font-extrabold text-xs sm:text-sm px-4 py-1 rounded-full border border-sky-300 mb-2">
@@ -485,6 +492,14 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'pegando-onda-fato-opiniao';
         const LEADERBOARD_STORAGE_KEY = 'pegando-onda-fato-opiniao-ranking';
 
+        function updateOfflineStatus(message, visible = true) {
+            const el = document.getElementById('offlineStatus');
+            const text = document.getElementById('offlineStatusText');
+            if (!el || !text) return;
+            text.textContent = message;
+            el.classList.toggle('hidden', !visible);
+        }
+
         async function loadFirebaseModules() {
             if (firebaseSdk) return firebaseSdk;
             try {
@@ -504,9 +519,11 @@
                     addDoc: firestoreMod.addDoc,
                     onSnapshot: firestoreMod.onSnapshot
                 };
+                updateOfflineStatus('Modo local ativado: o Firebase não está disponível, mas o jogo continua funcionando.', false);
                 return firebaseSdk;
             } catch (error) {
                 console.warn('Firebase indisponível. O jogo continuará em modo local.', error);
+                updateOfflineStatus('Modo local ativado: o Firebase não está disponível, mas o jogo continua funcionando.');
                 return null;
             }
         }
@@ -658,6 +675,7 @@
                 }
             } catch (err) {
                 console.warn('Modo offline do Placar ativado:', err);
+                updateOfflineStatus('Modo local ativado: o Firebase não está disponível, mas o jogo continua funcionando.');
                 loadLocalLeaderboard();
                 renderLeaderboardUI();
             }
